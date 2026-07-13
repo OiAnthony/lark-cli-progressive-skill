@@ -63,7 +63,7 @@ Apply only after reviewing the preview:
 node .agents/skills/lark/scripts/migrate-legacy-skills.mjs --apply
 ```
 
-The migration only removes `lark-*` directories whose `.agents/.skill-lock.json` source is exactly `larksuite/cli`. Untracked or third-party `lark-*` directories are reported but never removed. The migration currently targets the standard `.agents/` layout.
+The migration removes `lark-*` directories only when the current installer registry `skills-lock.json`, or the legacy `.agents/.skill-lock.json`, identifies their source as exactly `larksuite/cli`. Untracked or third-party `lark-*` directories are reported but never removed. The migration targets the standard `.agents/skills/` layout.
 
 ## Updating the generated guides
 

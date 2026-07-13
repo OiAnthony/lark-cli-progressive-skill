@@ -17,12 +17,27 @@ function isOfficialLarkSkill(lockEntry) {
   }
 }
 
+async function readLockfile(lockPath) {
+  try {
+    return { path: lockPath, lock: JSON.parse(await readFile(lockPath, "utf8")) };
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw new Error(`Cannot parse ${lockPath}: ${error.message}`);
+  }
+}
+
+function officialEntries(lock) {
+  return Object.entries(lock?.skills ?? {})
+    .filter(([name, entry]) => name.startsWith(LEGACY_PREFIX) && isOfficialLarkSkill(entry))
+    .map(([name]) => name)
+    .sort();
+}
+
 export async function inspectLegacyInstallation(projectRoot) {
-  const agentRoot = path.join(path.resolve(projectRoot), ".agents");
+  const resolvedProjectRoot = path.resolve(projectRoot);
+  const agentRoot = path.join(resolvedProjectRoot, ".agents");
   const skillsDirectory = path.join(agentRoot, "skills");
-  const lockPath = path.join(agentRoot, ".skill-lock.json");
   let directories = [];
-  let lock = null;
 
   try {
     directories = (await readdir(skillsDirectory, { withFileTypes: true }))
@@ -33,24 +48,22 @@ export async function inspectLegacyInstallation(projectRoot) {
     if (error.code !== "ENOENT") throw error;
   }
 
-  try {
-    lock = JSON.parse(await readFile(lockPath, "utf8"));
-  } catch (error) {
-    if (error.code !== "ENOENT") throw new Error(`Cannot parse ${lockPath}: ${error.message}`);
-  }
-
-  const lockEntries = Object.entries(lock?.skills ?? {})
-    .filter(([name, entry]) => name.startsWith(LEGACY_PREFIX) && isOfficialLarkSkill(entry))
-    .map(([name]) => name)
-    .sort();
+  const registries = (await Promise.all([
+    readLockfile(path.join(resolvedProjectRoot, "skills-lock.json")),
+    readLockfile(path.join(agentRoot, ".skill-lock.json")),
+  ])).filter(Boolean).map(({ path: lockPath, lock }) => ({
+    path: lockPath,
+    lock,
+    officialEntries: officialEntries(lock),
+  }));
+  const lockEntries = [...new Set(registries.flatMap((registry) => registry.officialEntries))].sort();
   const confirmedDirectories = directories.filter((name) => lockEntries.includes(name));
   const untrackedDirectories = directories.filter((name) => !lockEntries.includes(name));
 
   return {
     agentRoot,
     skillsDirectory,
-    lockPath,
-    lock,
+    registries,
     lockEntries,
     confirmedDirectories,
     untrackedDirectories,
@@ -63,12 +76,13 @@ export async function removeLegacyInstallation(projectRoot) {
     inspection.confirmedDirectories.map((name) => rm(path.join(inspection.skillsDirectory, name), { recursive: true, force: true })),
   );
 
-  if (inspection.lockEntries.length > 0) {
-    for (const name of inspection.lockEntries) delete inspection.lock.skills[name];
-    const temporaryPath = `${inspection.lockPath}.tmp`;
-    await writeFile(temporaryPath, `${JSON.stringify(inspection.lock, null, 2)}\n`);
-    await rename(temporaryPath, inspection.lockPath);
-  }
+  await Promise.all(inspection.registries.map(async (registry) => {
+    if (registry.officialEntries.length === 0) return;
+    for (const name of registry.officialEntries) delete registry.lock.skills[name];
+    const temporaryPath = `${registry.path}.tmp`;
+    await writeFile(temporaryPath, `${JSON.stringify(registry.lock, null, 2)}\n`);
+    await rename(temporaryPath, registry.path);
+  }));
 
   return inspection;
 }

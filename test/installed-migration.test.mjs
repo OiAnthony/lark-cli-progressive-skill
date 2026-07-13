@@ -24,7 +24,7 @@ test("bundled migration command preserves untracked lark-* directories", async (
   await mkdir(path.join(skillsDirectory, "lark-doc"), { recursive: true });
   await mkdir(path.join(skillsDirectory, "lark-local"), { recursive: true });
   await writeFile(
-    path.join(projectRoot, ".agents", ".skill-lock.json"),
+    path.join(projectRoot, "skills-lock.json"),
     `${JSON.stringify({
       skills: {
         "lark-doc": { source: "larksuite/cli" },
@@ -39,7 +39,7 @@ test("bundled migration command preserves untracked lark-* directories", async (
   assert.match(stdout, /Not removing untracked lark-\* directories: lark-local/);
   assert.equal(await exists(path.join(skillsDirectory, "lark-doc")), false);
   assert.equal(await exists(path.join(skillsDirectory, "lark-local")), true);
-  const lock = JSON.parse(await readFile(path.join(projectRoot, ".agents", ".skill-lock.json"), "utf8"));
+  const lock = JSON.parse(await readFile(path.join(projectRoot, "skills-lock.json"), "utf8"));
   assert.equal("lark-doc" in lock.skills, false);
   assert.equal("lark-local" in lock.skills, true);
 });

@@ -22,12 +22,12 @@ test("removes only larksuite/cli skills confirmed by the lockfile", async () => 
   await mkdir(path.join(skillsDirectory, "lark-evil"), { recursive: true });
   await mkdir(path.join(skillsDirectory, "calendar-helper"), { recursive: true });
   await writeFile(
-    path.join(projectRoot, ".agents", ".skill-lock.json"),
+    path.join(projectRoot, "skills-lock.json"),
     `${JSON.stringify({
-      version: 3,
+      version: 1,
       skills: {
-        "lark-im": { source: "larksuite/cli", sourceUrl: "https://github.com/larksuite/cli.git" },
-        "lark-custom": { source: "example/lark-custom", sourceUrl: "https://github.com/example/lark-custom.git" },
+        "lark-im": { source: "larksuite/cli", sourceType: "github", skillPath: "skills/lark-im/SKILL.md" },
+        "lark-custom": { source: "example/lark-custom", sourceType: "github" },
         "lark-evil": { source: "example/lark-evil", sourceUrl: "https://evil.example/github.com/larksuite/cli" },
       },
     }, null, 2)}\n`,
@@ -45,7 +45,7 @@ test("removes only larksuite/cli skills confirmed by the lockfile", async () => 
   assert.equal(await exists(path.join(skillsDirectory, "lark-evil")), true);
   assert.equal(await exists(path.join(skillsDirectory, "calendar-helper")), true);
 
-  const lock = JSON.parse(await readFile(path.join(projectRoot, ".agents", ".skill-lock.json"), "utf8"));
+  const lock = JSON.parse(await readFile(path.join(projectRoot, "skills-lock.json"), "utf8"));
   assert.equal("lark-im" in lock.skills, false);
   assert.equal("lark-custom" in lock.skills, true);
   assert.equal("lark-evil" in lock.skills, true);
