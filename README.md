@@ -22,23 +22,22 @@ skills/lark/SKILL.md                 one discovered skill
 
 The generated mirror deliberately renames every nested upstream `SKILL.md` to `GUIDE.md`. That prevents `npx skills` from discovering 27 separate skills while preserving each guide and its bundled resources.
 
-## Install
+## Install with a coding agent
 
-Install the official CLI first:
+Copy this one-line prompt into your coding agent:
+
+```text
+Install Lark CLI Progressive Skill globally for me by following https://github.com/OiAnthony/lark-cli-progressive-skill#readme: install the official CLI and single `lark` umbrella skill, then preview the documented global legacy-skill migration. If the preview lists any skills confirmed as sourced from `larksuite/cli`, verify every listed removal and apply it; otherwise do not apply a migration. Do not install the upstream `larksuite/cli` skill bundle.
+```
+
+## Manual installation
+
+### Global installation (recommended)
+
+Install the official CLI, then install the single `lark` umbrella skill globally for your coding agent:
 
 ```bash
 npx @larksuite/cli@latest install
-```
-
-Install the single umbrella skill into the current project:
-
-```bash
-npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -y
-```
-
-Use `-g` only when you explicitly want a global installation:
-
-```bash
 npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
 ```
 
@@ -49,21 +48,44 @@ Do not also install the upstream full skill bundle. It would restore the fixed c
 npx skills add larksuite/cli -g -y
 ```
 
-## Migrate from upstream domain skills
+### Migrate global upstream skills
 
-Install `lark` first. Then preview the migration in the target project:
+After the global installation, preview the migration of globally installed upstream `larksuite/cli` domain skills:
 
 ```bash
-node .agents/skills/lark/scripts/migrate-legacy-skills.mjs
+node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global
 ```
 
 Apply only after reviewing the preview:
 
 ```bash
+node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global --apply
+```
+
+The global migration uses the Skills CLI canonical directory, `$HOME/.agents/skills`, and its global registry. It also removes validated agent-specific symlinks that point to those canonical skills.
+
+The migration removes `lark-*` directories only when its installer registry identifies their source as exactly `larksuite/cli`, including agent-specific symlinks to those confirmed global skills. Untracked or third-party `lark-*` directories are reported but never removed.
+
+<details>
+<summary>Project-scoped installation</summary>
+
+Install the official CLI, then install the skill in the current project:
+
+```bash
+npx @larksuite/cli@latest install
+npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -y
+```
+
+Preview and apply a migration from the project-local skill directory:
+
+```bash
+node .agents/skills/lark/scripts/migrate-legacy-skills.mjs
 node .agents/skills/lark/scripts/migrate-legacy-skills.mjs --apply
 ```
 
-The migration removes `lark-*` directories only when the current installer registry `skills-lock.json`, or the legacy `.agents/.skill-lock.json`, identifies their source as exactly `larksuite/cli`. Untracked or third-party `lark-*` directories are reported but never removed. The migration targets the standard `.agents/skills/` layout.
+For project installations, the migration reads `skills-lock.json` and `.agents/.skill-lock.json` and removes only confirmed upstream `lark-*` skills.
+
+</details>
 
 ## Updating the generated guides
 

@@ -1,4 +1,5 @@
-import { readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { lstat, readdir, readFile, realpath, rename, rm, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
 import path from "node:path";
 
 const LEGACY_PREFIX = "lark-";
@@ -33,9 +34,89 @@ function officialEntries(lock) {
     .sort();
 }
 
-export async function inspectLegacyInstallation(projectRoot) {
+async function childDirectories(directory) {
+  try {
+    return (await readdir(directory, { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => path.join(directory, entry.name));
+  } catch {
+    return [];
+  }
+}
+
+async function globalSkillsDirectories(homeDirectory, canonicalSkillsDirectory) {
+  const directories = new Set();
+
+  async function visit(directory, depth) {
+    if (depth === 0) return;
+    for (const child of await childDirectories(directory)) {
+      if (path.basename(child) === "skills") {
+        directories.add(child);
+      }
+      await visit(child, depth - 1);
+    }
+  }
+
+  for (const directory of await childDirectories(homeDirectory)) {
+    if (path.basename(directory).startsWith(".")) await visit(directory, 3);
+  }
+
+  const canonicalDirectory = await realpath(canonicalSkillsDirectory).catch(() => canonicalSkillsDirectory);
+  const aliasDirectories = [];
+  for (const directory of directories) {
+    const resolvedDirectory = await realpath(directory).catch(() => directory);
+    if (resolvedDirectory !== canonicalDirectory) aliasDirectories.push(directory);
+  }
+  return aliasDirectories;
+}
+
+async function globalLinkedSkills(homeDirectory, canonicalSkillsDirectory, names) {
+  const linkedSkills = [];
+  const skillsDirectories = await globalSkillsDirectories(homeDirectory, canonicalSkillsDirectory);
+
+  for (const skillsDirectory of skillsDirectories) {
+    for (const name of names) {
+      const candidate = path.join(skillsDirectory, name);
+      try {
+        if (!(await lstat(candidate)).isSymbolicLink()) continue;
+        const [target, canonicalSkill] = await Promise.all([
+          realpath(candidate),
+          realpath(path.join(canonicalSkillsDirectory, name)),
+        ]);
+        if (target === canonicalSkill) linkedSkills.push(candidate);
+      } catch {
+        // Ignore missing or unresolved links. Only existing links to confirmed skills are removed.
+      }
+    }
+  }
+
+  return linkedSkills;
+}
+
+function installationPaths(projectRoot, global) {
+  if (global) {
+    const agentRoot = path.join(homedir(), ".agents");
+    return {
+      agentRoot,
+      registryPaths: [process.env.XDG_STATE_HOME
+        ? path.join(process.env.XDG_STATE_HOME, "skills", ".skill-lock.json")
+        : path.join(agentRoot, ".skill-lock.json")],
+    };
+  }
+
   const resolvedProjectRoot = path.resolve(projectRoot);
   const agentRoot = path.join(resolvedProjectRoot, ".agents");
+  return {
+    agentRoot,
+    registryPaths: [
+      path.join(resolvedProjectRoot, "skills-lock.json"),
+      path.join(agentRoot, ".skill-lock.json"),
+    ],
+  };
+}
+
+export async function inspectLegacyInstallation(projectRoot = process.cwd(), { global = false } = {}) {
+  const { agentRoot, registryPaths } = installationPaths(projectRoot, global);
   const skillsDirectory = path.join(agentRoot, "skills");
   let directories = [];
 
@@ -48,10 +129,7 @@ export async function inspectLegacyInstallation(projectRoot) {
     if (error.code !== "ENOENT") throw error;
   }
 
-  const registries = (await Promise.all([
-    readLockfile(path.join(resolvedProjectRoot, "skills-lock.json")),
-    readLockfile(path.join(agentRoot, ".skill-lock.json")),
-  ])).filter(Boolean).map(({ path: lockPath, lock }) => ({
+  const registries = (await Promise.all(registryPaths.map(readLockfile))).filter(Boolean).map(({ path: lockPath, lock }) => ({
     path: lockPath,
     lock,
     officialEntries: officialEntries(lock),
@@ -59,6 +137,9 @@ export async function inspectLegacyInstallation(projectRoot) {
   const lockEntries = [...new Set(registries.flatMap((registry) => registry.officialEntries))].sort();
   const confirmedDirectories = directories.filter((name) => lockEntries.includes(name));
   const untrackedDirectories = directories.filter((name) => !lockEntries.includes(name));
+  const linkedSkills = global
+    ? await globalLinkedSkills(homedir(), skillsDirectory, confirmedDirectories)
+    : [];
 
   return {
     agentRoot,
@@ -66,14 +147,18 @@ export async function inspectLegacyInstallation(projectRoot) {
     registries,
     lockEntries,
     confirmedDirectories,
+    linkedSkills,
     untrackedDirectories,
   };
 }
 
-export async function removeLegacyInstallation(projectRoot) {
-  const inspection = await inspectLegacyInstallation(projectRoot);
+export async function removeLegacyInstallation(projectRoot = process.cwd(), options) {
+  const inspection = await inspectLegacyInstallation(projectRoot, options);
   await Promise.all(
-    inspection.confirmedDirectories.map((name) => rm(path.join(inspection.skillsDirectory, name), { recursive: true, force: true })),
+    [
+      ...inspection.confirmedDirectories.map((name) => path.join(inspection.skillsDirectory, name)),
+      ...inspection.linkedSkills,
+    ].map((skill) => rm(skill, { recursive: true, force: true })),
   );
 
   await Promise.all(inspection.registries.map(async (registry) => {
