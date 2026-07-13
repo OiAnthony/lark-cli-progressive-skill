@@ -4,15 +4,26 @@ import path from "node:path";
 
 const LEGACY_PREFIX = "lark-";
 
-function isOfficialLarkSkill(lockEntry) {
+function isOfficialLarkSkill(name, lockEntry) {
   if (lockEntry?.source === "larksuite/cli") {
     return true;
   }
 
   try {
     const sourceUrl = new URL(lockEntry?.sourceUrl);
-    return sourceUrl.hostname === "github.com"
+    const isGitHubSource = sourceUrl.hostname === "github.com"
       && sourceUrl.pathname.replace(/\.git$/, "") === "/larksuite/cli";
+    const isWellKnownSource = lockEntry?.source === "open.feishu.cn"
+      && lockEntry?.sourceType === "well-known"
+      && sourceUrl.protocol === "https:"
+      && sourceUrl.hostname === "open.feishu.cn"
+      && sourceUrl.port === ""
+      && sourceUrl.username === ""
+      && sourceUrl.password === ""
+      && sourceUrl.pathname === `/.well-known/skills/${name}/SKILL.md`
+      && sourceUrl.search === ""
+      && sourceUrl.hash === "";
+    return isGitHubSource || isWellKnownSource;
   } catch {
     return false;
   }
@@ -29,7 +40,7 @@ async function readLockfile(lockPath) {
 
 function officialEntries(lock) {
   return Object.entries(lock?.skills ?? {})
-    .filter(([name, entry]) => name.startsWith(LEGACY_PREFIX) && isOfficialLarkSkill(entry))
+    .filter(([name, entry]) => name.startsWith(LEGACY_PREFIX) && isOfficialLarkSkill(name, entry))
     .map(([name]) => name)
     .sort();
 }

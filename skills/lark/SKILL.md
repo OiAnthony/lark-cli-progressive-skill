@@ -42,6 +42,12 @@ description: "Use Lark CLI for Lark/Feishu work: calendar, messages and chats, D
 
 无法从表中可靠路由时，先读取 `references/subskills/catalog.md`；仍有歧义且会改变外部副作用或授权范围时，只询问一个消歧问题。
 
+## Progressive 安装约束
+
+- 每次执行 `lark-cli` 时设置 `LARKSUITE_CLI_NO_UPDATE_NOTIFIER=1 LARKSUITE_CLI_NO_SKILLS_NOTIFIER=1`。本 skill 已内置上游领域指南，缺少独立 `lark-*` skills 是预期状态。
+- 不执行 `lark-cli update`，即使生成的领域 guide 建议这样做；该命令会重新安装上游完整 skill bundle。
+- 更新 CLI binary 时使用 `npm install -g @larksuite/cli@latest`；更新领域指南时重新安装或更新本 `lark` skill。此约束优先于生成的 guide 中的更新说明。
+
 ## 安全和确认
 
 - 不输出 access token、refresh token、app secret 或其他长期凭证；不将 device code 或授权链接作为可复用状态保存。

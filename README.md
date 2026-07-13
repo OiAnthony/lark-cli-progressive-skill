@@ -27,7 +27,7 @@ The generated mirror deliberately renames every nested upstream `SKILL.md` to `G
 Copy this one-line prompt into your coding agent:
 
 ```text
-Install Lark CLI Progressive Skill globally for me by following https://github.com/OiAnthony/lark-cli-progressive-skill#readme: install the official CLI and single `lark` umbrella skill, then preview the documented global legacy-skill migration. If the preview lists any skills confirmed as sourced from `larksuite/cli`, verify every listed removal and apply it; otherwise do not apply a migration. Do not install the upstream `larksuite/cli` skill bundle.
+Install Lark CLI Progressive Skill globally for me by following https://github.com/OiAnthony/lark-cli-progressive-skill#readme: install only the official CLI binary with `npm install -g @larksuite/cli@latest`, install the single `lark` umbrella skill, then preview the documented global legacy-skill migration. If the preview lists any skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` well-known registry, verify every listed removal and apply it; otherwise do not apply a migration. Do not run the upstream setup wizard or install its full skill bundle.
 ```
 
 ## Manual installation
@@ -37,14 +37,15 @@ Install Lark CLI Progressive Skill globally for me by following https://github.c
 Install the official CLI, then install the single `lark` umbrella skill globally for your coding agent:
 
 ```bash
-npx @larksuite/cli@latest install
+npm install -g @larksuite/cli@latest
 npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
 ```
 
-Do not also install the upstream full skill bundle. It would restore the fixed context cost:
+The upstream setup wizard installs the full skill bundle, so do not use it with this wrapper. Do not install that bundle separately either; both commands would restore the fixed context cost:
 
 ```bash
-# Do not combine this with the umbrella skill.
+# Do not combine either command with the umbrella skill.
+npx @larksuite/cli@latest install
 npx skills add larksuite/cli -g -y
 ```
 
@@ -64,7 +65,7 @@ node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global --ap
 
 The global migration uses the Skills CLI canonical directory, `$HOME/.agents/skills`, and its global registry. It also removes validated agent-specific symlinks that point to those canonical skills.
 
-The migration removes `lark-*` directories only when its installer registry identifies their source as exactly `larksuite/cli`, including agent-specific symlinks to those confirmed global skills. Untracked or third-party `lark-*` directories are reported but never removed.
+The migration removes `lark-*` directories only when its installer registry identifies their source as exactly `larksuite/cli`, its GitHub repository, or the official `open.feishu.cn` well-known skill URL, including agent-specific symlinks to those confirmed global skills. Untracked or third-party `lark-*` directories are reported but never removed.
 
 <details>
 <summary>Project-scoped installation</summary>
@@ -72,7 +73,7 @@ The migration removes `lark-*` directories only when its installer registry iden
 Install the official CLI, then install the skill in the current project:
 
 ```bash
-npx @larksuite/cli@latest install
+npm install -g @larksuite/cli@latest
 npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -y
 ```
 
@@ -86,6 +87,17 @@ node .agents/skills/lark/scripts/migrate-legacy-skills.mjs --apply
 For project installations, the migration reads `skills-lock.json` and `.agents/.skill-lock.json` and removes only confirmed upstream `lark-*` skills.
 
 </details>
+
+## Updating
+
+Update the CLI binary and the progressive skill separately:
+
+```bash
+npm install -g @larksuite/cli@latest
+npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
+```
+
+Do not run `lark-cli update` with this wrapper. That command updates the binary and reinstalls the upstream full skill bundle. The umbrella skill suppresses the resulting CLI update and skill-sync notices per command; it does not modify your shell configuration.
 
 ## Updating the generated guides
 
@@ -105,9 +117,10 @@ npm run check
 npm test
 npm run check
 npx skills add . --list
+npx skills ls -g
 ```
 
-The last command must report exactly one available skill: `lark`.
+The package listing must report exactly one available skill: `lark`. After a global installation or migration, the global listing must contain `lark` and no `lark-*` domain skills.
 
 ## Security behavior
 

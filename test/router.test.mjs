@@ -30,4 +30,8 @@ test("router keeps domain coverage while requiring lazy guide reads", async () =
   assert.match(router, /lark-cli <service> --help/);
   assert.match(router, /授权 URL 应直接转交给用户/);
   assert.match(router, /device code 或授权链接作为可复用状态保存/);
+  assert.match(router, /不执行 `lark-cli update`/);
+  assert.match(router, /npm install -g @larksuite\/cli@latest/);
+  assert.match(router, /LARKSUITE_CLI_NO_UPDATE_NOTIFIER=1/);
+  assert.match(router, /LARKSUITE_CLI_NO_SKILLS_NOTIFIER=1/);
 });

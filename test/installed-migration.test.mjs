@@ -36,7 +36,11 @@ test("bundled migration command preserves untracked lark-* directories", async (
     path.join(projectRoot, "skills-lock.json"),
     `${JSON.stringify({
       skills: {
-        "lark-doc": { source: "larksuite/cli" },
+        "lark-doc": {
+          source: "open.feishu.cn",
+          sourceType: "well-known",
+          sourceUrl: "https://open.feishu.cn/.well-known/skills/lark-doc/SKILL.md",
+        },
         "lark-local": { source: "personal/lark-local" },
       },
     })}\n`,
@@ -44,7 +48,7 @@ test("bundled migration command preserves untracked lark-* directories", async (
 
   const { stdout } = await execFile(process.execPath, [script, "--target", projectRoot, "--apply"]);
 
-  assert.match(stdout, /Removed official larksuite\/cli skills: lark-doc/);
+  assert.match(stdout, /Removed official Lark skills: lark-doc/);
   assert.match(stdout, /Not removing untracked lark-\* directories: lark-local/);
   assert.equal(await exists(path.join(skillsDirectory, "lark-doc")), false);
   assert.equal(await exists(path.join(skillsDirectory, "lark-local")), true);
@@ -70,17 +74,29 @@ test("bundled migration command removes global legacy skills", async () => {
     path.join(agentRoot, ".skill-lock.json"),
     `${JSON.stringify({
       skills: {
-        "lark-doc": { source: "larksuite/cli" },
+        "lark-doc": {
+          source: "open.feishu.cn",
+          sourceType: "well-known",
+          sourceUrl: "https://open.feishu.cn/.well-known/skills/lark-doc/SKILL.md",
+        },
         "lark-local": { source: "personal/lark-local" },
       },
     })}\n`,
   );
 
+  const { stdout: previewStdout } = await execFile(process.execPath, [script, "--global"], {
+    env: { ...process.env, HOME: homeDirectory },
+  });
+  assert.match(previewStdout, /Would remove official Lark skills: lark-doc/);
+  assert.equal(await exists(path.join(skillsDirectory, "lark-doc")), true);
+  const previewLock = JSON.parse(await readFile(path.join(agentRoot, ".skill-lock.json"), "utf8"));
+  assert.equal("lark-doc" in previewLock.skills, true);
+
   const { stdout } = await execFile(process.execPath, [script, "--global", "--apply"], {
     env: { ...process.env, HOME: homeDirectory },
   });
 
-  assert.match(stdout, /Removed official larksuite\/cli skills: lark-doc/);
+  assert.match(stdout, /Removed official Lark skills: lark-doc/);
   assert.match(stdout, /Not removing untracked lark-\* directories: lark-local/);
   assert.equal(await exists(path.join(skillsDirectory, "lark-doc")), false);
   assert.equal(await exists(path.join(skillsDirectory, "lark-local")), true);

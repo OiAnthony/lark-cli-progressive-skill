@@ -50,3 +50,58 @@ test("removes only larksuite/cli skills confirmed by the lockfile", async () => 
   assert.equal("lark-custom" in lock.skills, true);
   assert.equal("lark-evil" in lock.skills, true);
 });
+
+test("removes only exact official well-known skills", async () => {
+  const projectRoot = await mkdtemp(path.join(os.tmpdir(), "lark-well-known-migration-"));
+  const skillsDirectory = path.join(projectRoot, ".agents", "skills");
+  const names = ["lark-doc", "lark-evil", "lark-http", "lark-wrong-path", "lark-mismatch"];
+  await Promise.all(names.map((name) => mkdir(path.join(skillsDirectory, name), { recursive: true })));
+  await writeFile(
+    path.join(projectRoot, "skills-lock.json"),
+    `${JSON.stringify({
+      version: 3,
+      skills: {
+        "lark-doc": {
+          source: "open.feishu.cn",
+          sourceType: "well-known",
+          sourceUrl: "https://open.feishu.cn/.well-known/skills/lark-doc/SKILL.md",
+        },
+        "lark-evil": {
+          source: "open.feishu.cn",
+          sourceType: "well-known",
+          sourceUrl: "https://evil.example/.well-known/skills/lark-evil/SKILL.md",
+        },
+        "lark-http": {
+          source: "open.feishu.cn",
+          sourceType: "well-known",
+          sourceUrl: "http://open.feishu.cn/.well-known/skills/lark-http/SKILL.md",
+        },
+        "lark-wrong-path": {
+          source: "open.feishu.cn",
+          sourceType: "well-known",
+          sourceUrl: "https://open.feishu.cn/skills/lark-wrong-path/SKILL.md",
+        },
+        "lark-mismatch": {
+          source: "open.feishu.cn",
+          sourceType: "well-known",
+          sourceUrl: "https://open.feishu.cn/.well-known/skills/lark-doc/SKILL.md",
+        },
+      },
+    }, null, 2)}\n`,
+  );
+
+  const preview = await inspectLegacyInstallation(projectRoot);
+  assert.deepEqual(preview.confirmedDirectories, ["lark-doc"]);
+  assert.deepEqual(preview.untrackedDirectories, ["lark-evil", "lark-http", "lark-mismatch", "lark-wrong-path"]);
+
+  await removeLegacyInstallation(projectRoot);
+
+  assert.equal(await exists(path.join(skillsDirectory, "lark-doc")), false);
+  for (const name of names.filter((name) => name !== "lark-doc")) {
+    assert.equal(await exists(path.join(skillsDirectory, name)), true);
+  }
+
+  const lock = JSON.parse(await readFile(path.join(projectRoot, "skills-lock.json"), "utf8"));
+  assert.equal("lark-doc" in lock.skills, false);
+  assert.equal("lark-evil" in lock.skills, true);
+});

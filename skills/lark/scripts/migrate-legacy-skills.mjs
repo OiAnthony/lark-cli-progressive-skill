@@ -22,11 +22,11 @@ const inspection = apply
 const items = [...new Set([...inspection.confirmedDirectories, ...inspection.lockEntries])];
 
 if (items.length === 0) {
-  console.log("No legacy skills from larksuite/cli found.");
+  console.log("No legacy skills from official Lark sources found.");
 } else if (apply) {
-  console.log(`Removed official larksuite/cli skills: ${items.join(", ")}`);
+  console.log(`Removed official Lark skills: ${items.join(", ")}`);
 } else {
-  console.log(`Would remove official larksuite/cli skills: ${items.join(", ")}`);
+  console.log(`Would remove official Lark skills: ${items.join(", ")}`);
   console.log("Re-run with --apply after installing this umbrella skill.");
 }
 
