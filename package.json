@@ -1,0 +1,16 @@
+{
+  "name": "lark-cli-progressive-skill",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Progressive-disclosure umbrella skill for Lark CLI",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "sync:upstream": "node scripts/sync-upstream.mjs",
+    "check": "node scripts/check-package.mjs",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
