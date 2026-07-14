@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 export const UPSTREAM = Object.freeze({
@@ -139,7 +139,7 @@ export async function writeMirror({ destination, files, source, generatedAt = ne
   }
 
   const lock = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt,
     upstream: source,
     skills: [...skills.keys()].sort(),
@@ -175,6 +175,14 @@ async function fetchJson(url, fetchImpl, headers) {
   return response.json();
 }
 
+function githubHeaders(token) {
+  return {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "lark-cli-progressive-skill",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 async function mapWithConcurrency(items, limit, callback) {
   const results = new Array(items.length);
   let cursor = 0;
@@ -189,21 +197,39 @@ async function mapWithConcurrency(items, limit, callback) {
   return results;
 }
 
+export async function fetchUpstreamVersion({
+  owner = UPSTREAM.owner,
+  repo = UPSTREAM.repo,
+  ref = UPSTREAM.ref,
+  fetchImpl = fetch,
+  token = process.env.GITHUB_TOKEN,
+} = {}) {
+  const headers = githubHeaders(token);
+  const apiBase = `https://api.github.com/repos/${owner}/${repo}`;
+  const commit = await fetchJson(`${apiBase}/commits/${ref}`, fetchImpl, headers);
+  const rootTree = await fetchJson(`${apiBase}/git/trees/${commit.sha}`, fetchImpl, headers);
+  const skillsEntries = rootTree.tree.filter((entry) => entry.path === "skills" && entry.type === "tree");
+
+  if (skillsEntries.length !== 1) {
+    throw new Error("Expected exactly one skills tree in the upstream repository root");
+  }
+
+  return { owner, repo, ref, commit: commit.sha, skillsTree: skillsEntries[0].sha };
+}
+
 export async function fetchUpstreamSkillFiles({
   owner = UPSTREAM.owner,
   repo = UPSTREAM.repo,
   ref = UPSTREAM.ref,
   fetchImpl = fetch,
   token = process.env.GITHUB_TOKEN,
-}) {
-  const headers = {
-    Accept: "application/vnd.github+json",
-    "User-Agent": "lark-cli-progressive-skill",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-  const apiBase = `https://api.github.com/repos/${owner}/${repo}`;
-  const commit = await fetchJson(`${apiBase}/commits/${ref}`, fetchImpl, headers);
-  const tree = await fetchJson(`${apiBase}/git/trees/${commit.sha}?recursive=1`, fetchImpl, headers);
+  source = null,
+} = {}) {
+  const resolvedSource = source ?? await fetchUpstreamVersion({ owner, repo, ref, fetchImpl, token });
+  const headers = githubHeaders(token);
+  const { owner: sourceOwner, repo: sourceRepo, ref: sourceRef, commit: sourceCommit } = resolvedSource;
+  const apiBase = `https://api.github.com/repos/${sourceOwner}/${sourceRepo}`;
+  const tree = await fetchJson(`${apiBase}/git/trees/${sourceCommit}?recursive=1`, fetchImpl, headers);
 
   if (tree.truncated) {
     throw new Error("GitHub returned a truncated tree; refusing an incomplete mirror");
@@ -216,7 +242,7 @@ export async function fetchUpstreamSkillFiles({
 
   const files = await mapWithConcurrency(paths, 8, async (sourcePath) => {
     const response = await fetchImpl(
-      `https://raw.githubusercontent.com/${owner}/${repo}/${commit.sha}/${sourcePath}`,
+      `https://raw.githubusercontent.com/${sourceOwner}/${sourceRepo}/${sourceCommit}/${sourcePath}`,
       { headers: { "User-Agent": "lark-cli-progressive-skill" } },
     );
     if (!response.ok) {
@@ -226,8 +252,47 @@ export async function fetchUpstreamSkillFiles({
     return { path: sourcePath, content: Buffer.from(await response.arrayBuffer()) };
   });
 
-  return {
-    files,
-    source: { owner, repo, ref, commit: commit.sha },
-  };
+  return { files, source: { owner: sourceOwner, repo: sourceRepo, ref: sourceRef, commit: sourceCommit, skillsTree: resolvedSource.skillsTree } };
+}
+
+function hasMatchingSource(lock, source) {
+  return lock?.upstream?.owner === source.owner
+    && lock.upstream.repo === source.repo
+    && lock.upstream.ref === source.ref;
+}
+
+async function readLock(lockPath) {
+  try {
+    return JSON.parse(await readFile(lockPath, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+export async function syncUpstreamMirror({
+  destination,
+  fetchImpl = fetch,
+  token = process.env.GITHUB_TOKEN,
+}) {
+  const lockPath = path.join(destination, "upstream.lock.json");
+  const lock = await readLock(lockPath);
+  const source = await fetchUpstreamVersion({ fetchImpl, token });
+
+  if (lock?.schemaVersion === 2 && hasMatchingSource(lock, source) && lock.upstream.skillsTree === source.skillsTree) {
+    return { status: "unchanged", source };
+  }
+
+  if (lock?.schemaVersion === 1 && hasMatchingSource(lock, source) && lock.upstream.commit === source.commit) {
+    const migratedLock = {
+      ...lock,
+      schemaVersion: 2,
+      upstream: { ...lock.upstream, skillsTree: source.skillsTree },
+    };
+    await writeFile(lockPath, `${JSON.stringify(migratedLock, null, 2)}\n`);
+    return { status: "migrated", source };
+  }
+
+  const { files } = await fetchUpstreamSkillFiles({ source, fetchImpl, token });
+  const updatedLock = await writeMirror({ destination, files, source });
+  return { status: "updated", source, lock: updatedLock };
 }

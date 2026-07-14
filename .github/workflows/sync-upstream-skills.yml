@@ -1,0 +1,41 @@
+name: Sync upstream Lark skills
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-upstream-skills
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+      - run: npm run sync:upstream
+      - run: npm test
+      - run: npm run check
+      - uses: peter-evans/create-pull-request@v8.1.1
+        with:
+          add-paths: skills/lark/references/subskills
+          branch: automation/sync-lark-skills
+          base: master
+          delete-branch: true
+          commit-message: "chore(skills): sync lark cli skills"
+          title: "chore(skills): sync lark cli skills"
+          body: |
+            Automated mirror update from `larksuite/cli`.
+
+            Validated with `npm test` and `npm run check`.
+            Review generated guide changes before merging, especially authentication, authorization, sending, deletion, approval, and permission workflows.

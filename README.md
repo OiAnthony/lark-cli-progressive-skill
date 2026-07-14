@@ -109,7 +109,9 @@ npm test
 npm run check
 ```
 
-`upstream.lock.json` records the upstream commit and a SHA-256 hash for every mirrored source file. Review all guide changes before committing them, especially authentication, authorization, sending, deletion, approval, and permission workflows.
+`upstream.lock.json` schema 2 records the upstream commit, the `skillsTree` Git tree SHA, and a SHA-256 hash for every mirrored source file. A repeated sync only queries the upstream commit and `skills` tree; when the tree SHA is unchanged it does not download or rewrite guides.
+
+GitHub Actions runs this check daily. Only an actual mirror diff that passes `npm test` and `npm run check` creates or updates the single `automation/sync-lark-skills` pull request. Review generated guide changes before merging, especially authentication, authorization, sending, deletion, approval, and permission workflows.
 
 ## Verification
 

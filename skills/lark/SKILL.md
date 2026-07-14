@@ -1,11 +1,11 @@
 ---
 name: lark
-description: "Use Lark CLI for Lark/Feishu work: calendar, messages and chats, Docs, Drive files and permissions, Base, Sheets, Mail, Tasks, Wiki, meetings, approvals, attendance, OKRs, or OpenAPI. Route the request to exactly the required bundled domain guide before invoking lark-cli."
+description: "Use Lark CLI for Lark/Feishu/飞书 work: calendar, messages and chats, Docs, Drive files and permissions, Base, Sheets, Mail, Tasks, Wiki, meetings, approvals, attendance, OKRs, or OpenAPI. Route the request to exactly the required bundled domain guide before invoking lark-cli."
 ---
 
 # Lark CLI
 
-当用户要操作、配置、认证、诊断 Lark/Feishu 或 `lark-cli` 时使用本 skill。不要为普通代码、文案、日历概念解释或与 Lark 无关的任务加载它。
+当用户要操作、配置、认证、诊断 Lark/Feishu/飞书 或 `lark-cli` 时使用本 skill。不要为普通代码、文案、日历概念解释或与 Lark 无关的任务加载它。
 
 ## 执行顺序
 
@@ -17,28 +17,28 @@ description: "Use Lark CLI for Lark/Feishu work: calendar, messages and chats, D
 
 ## 路由
 
-| 用户目标 | Domain |
-| --- | --- |
-| 日程、忙闲、会议室、RSVP | `lark-calendar` |
-| 消息、群聊、reaction、聊天附件 | `lark-im` |
-| 文档内容和 blocks | `lark-doc` |
-| 文件、下载、评论、权限 | `lark-drive` |
-| 原生 Markdown 文件 | `lark-markdown` |
-| 电子表格、range、公式 | `lark-sheets` |
-| 多维表格、字段、记录、视图 | `lark-base` |
-| 任务、任务清单、提醒 | `lark-task` |
-| 收件箱、草稿、发送、邮件规则 | `lark-mail` |
-| 知识空间、Wiki 节点 | `lark-wiki` |
-| 幻灯片 | `lark-slides` |
-| 联系人和用户查询 | `lark-contact` |
-| 妙记、转写、摘要、待办 | `lark-minutes` |
-| 会议记录和会议产物 | `lark-vc` |
-| 审批 | `lark-approval` |
-| 考勤 | `lark-attendance` |
-| OKR | `lark-okr` |
-| 事件订阅 | `lark-event` |
-| 白板或图表 DSL | `lark-whiteboard` |
-| 未覆盖的开放平台 API | `lark-openapi-explorer` |
+| 用户目标                       | Domain                  |
+| ------------------------------ | ----------------------- |
+| 日程、忙闲、会议室、RSVP       | `lark-calendar`         |
+| 消息、群聊、reaction、聊天附件 | `lark-im`               |
+| 文档内容和 blocks              | `lark-doc`              |
+| 文件、下载、评论、权限         | `lark-drive`            |
+| 原生 Markdown 文件             | `lark-markdown`         |
+| 电子表格、range、公式          | `lark-sheets`           |
+| 多维表格、字段、记录、视图     | `lark-base`             |
+| 任务、任务清单、提醒           | `lark-task`             |
+| 收件箱、草稿、发送、邮件规则   | `lark-mail`             |
+| 知识空间、Wiki 节点            | `lark-wiki`             |
+| 幻灯片                         | `lark-slides`           |
+| 联系人和用户查询               | `lark-contact`          |
+| 妙记、转写、摘要、待办         | `lark-minutes`          |
+| 会议记录和会议产物             | `lark-vc`               |
+| 审批                           | `lark-approval`         |
+| 考勤                           | `lark-attendance`       |
+| OKR                            | `lark-okr`              |
+| 事件订阅                       | `lark-event`            |
+| 白板或图表 DSL                 | `lark-whiteboard`       |
+| 未覆盖的开放平台 API           | `lark-openapi-explorer` |
 
 无法从表中可靠路由时，先读取 `references/subskills/catalog.md`；仍有歧义且会改变外部副作用或授权范围时，只询问一个消歧问题。
 
