@@ -1,12 +1,12 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-14T11:05:48.292Z",
+  "generatedAt": "2026-07-14T11:24:07.981Z",
   "upstream": {
     "owner": "larksuite",
     "repo": "cli",
     "ref": "main",
-    "commit": "37d490a198c5c76fa06549f7d7933e485c02bf2b",
-    "skillsTree": "35fc074d472625aecdccd1dc9775e40a3442a674"
+    "commit": "1c3674487f7ed71cd7f8ef51a97ba3ccd1f7473c",
+    "skillsTree": "64392b4a41c9abc734e413487701ea8435c94d93"
   },
   "skills": [
     "lark-approval",
@@ -1806,7 +1806,7 @@
     {
       "sourcePath": "skills/lark-task/SKILL.md",
       "targetPath": "lark-task/GUIDE.md",
-      "sha256": "e931bb0e953e61333b622a73f11db87b481b892a9fbaf3ae4ffe4e0e0e1568e3"
+      "sha256": "d25f0a89674748d08363e2baf0aa6ef654a63745befc44ce6986a20718a2e4e1"
     },
     {
       "sourcePath": "skills/lark-vc-agent/references/lark-vc-agent-meeting-events.md",
