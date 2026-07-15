@@ -2,7 +2,7 @@ name: Sync upstream Lark skills
 
 on:
   schedule:
-    - cron: "17 3 * * *"
+    - cron: "0 22 * * *"
   workflow_dispatch:
 
 permissions:
@@ -26,16 +26,20 @@ jobs:
       - run: npm run sync:upstream
       - run: npm test
       - run: npm run check
-      - uses: peter-evans/create-pull-request@v8.1.1
+      - id: cpr
+        uses: peter-evans/create-pull-request@v8.1.1
         with:
           add-paths: skills/lark/references/subskills
           branch: automation/sync-lark-skills
           base: master
-          delete-branch: true
           commit-message: "chore(skills): sync lark cli skills"
           title: "chore(skills): sync lark cli skills"
           body: |
             Automated mirror update from `larksuite/cli`.
 
             Validated with `npm test` and `npm run check`.
-            Review generated guide changes before merging, especially authentication, authorization, sending, deletion, approval, and permission workflows.
+      - name: Merge generated pull request
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: gh pr merge --squash --delete-branch "${{ steps.cpr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
