@@ -26,7 +26,15 @@
 - 你需要上游 Lark CLI 的完整独立 skill bundle。
 - 你不使用支持 Skills 的 Coding Agent。
 
-## 快速开始
+## 推荐：让 Coding Agent 安装
+
+把下面提示词复制给你的 Coding Agent。它会阅读本 README、完成全局安装，并检查是否存在已安装的官方旧版 `lark-*` skills。只有检测到这类 skills 时，才会预览并执行迁移。
+
+```text
+Read and follow https://github.com/OiAnthony/lark-cli-progressive-skill#readme. Install the official Lark CLI binary and the single global `lark` umbrella skill. If the documented migration preview finds legacy skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` registry, verify each listed removal and complete the documented migration. Do not run the upstream setup wizard or install the upstream full skill bundle.
+```
+
+## 手动安装
 
 ### 环境要求
 
@@ -51,14 +59,6 @@ npx skills ls -g
 ```
 
 列表中应包含 `lark`。首次安装时不应出现 `lark-calendar`、`lark-im`、`lark-doc` 等单独领域 skill。
-
-## 让 Coding Agent 安装
-
-把下面提示词复制给你的 Coding Agent。它会阅读本 README 并完成全局安装。只有检测到已安装的官方旧版 `lark-*` skills 时，才会预览并执行迁移。
-
-```text
-Read and follow https://github.com/OiAnthony/lark-cli-progressive-skill#readme. Install the official Lark CLI binary and the single global `lark` umbrella skill. If the documented migration preview finds legacy skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` registry, verify each listed removal and complete the documented migration. Do not run the upstream setup wizard or install the upstream full skill bundle.
-```
 
 ## 首次连接飞书
 

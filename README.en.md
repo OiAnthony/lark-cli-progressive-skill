@@ -26,7 +26,15 @@ Do not use this package when:
 - You need the upstream Lark CLI's complete standalone skill bundle.
 - You do not use a coding agent that supports Skills.
 
-## Quick start
+## Recommended: install with a coding agent
+
+Copy the following prompt into your coding agent. It reads this README, completes the global installation, and checks for legacy official `lark-*` skills. It previews and performs a migration only when it finds those skills.
+
+```text
+Read and follow https://github.com/OiAnthony/lark-cli-progressive-skill#readme. Install the official Lark CLI binary and the single global `lark` umbrella skill. If the documented migration preview finds legacy skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` registry, verify each listed removal and complete the documented migration. Do not run the upstream setup wizard or install the upstream full skill bundle.
+```
+
+## Manual installation
 
 ### Requirements
 
@@ -51,14 +59,6 @@ npx skills ls -g
 ```
 
 The list should include `lark`. A fresh installation should not show standalone domain skills such as `lark-calendar`, `lark-im`, or `lark-doc`.
-
-## Install with a coding agent
-
-Copy the following prompt into your coding agent. It reads this README and completes the global installation. It previews and performs a migration only when it finds legacy official `lark-*` skills.
-
-```text
-Read and follow https://github.com/OiAnthony/lark-cli-progressive-skill#readme. Install the official Lark CLI binary and the single global `lark` umbrella skill. If the documented migration preview finds legacy skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` registry, verify each listed removal and complete the documented migration. Do not run the upstream setup wizard or install the upstream full skill bundle.
-```
 
 ## Connect Lark for the first time
 
