@@ -26,13 +26,15 @@ jobs:
       - run: npm run sync:upstream
       - run: npm test
       - run: npm run check
+      - id: sync_date
+        run: echo "date=$(TZ=Asia/Shanghai date +%F)" >> "$GITHUB_OUTPUT"
       - id: cpr
         uses: peter-evans/create-pull-request@v8.1.1
         with:
           add-paths: skills/lark/references/subskills
           branch: automation/sync-lark-skills
           base: master
-          commit-message: "chore(skills): sync lark cli skills"
+          commit-message: "chore(skills): sync lark cli skills (${{ steps.sync_date.outputs.date }})"
           title: "chore(skills): sync lark cli skills"
           body: |
             Automated mirror update from `larksuite/cli`.
