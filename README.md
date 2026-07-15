@@ -2,86 +2,130 @@
 
 # Lark CLI Progressive Skill
 
-面向 [Lark CLI](https://github.com/larksuite/cli) 的可选渐进式加载 umbrella skill。
+让 Coding Agent 用一个 `lark` skill 操作飞书。
 
-上游包目前暴露了多个领域 skill。本包只暴露一个可发现的 `lark` skill，并且只在任务需要时加载对应领域指南。它采用了 [larksuite/cli#1392](https://github.com/larksuite/cli/issues/1392) 提出的设计思路，是独立维护的 wrapper，不是 Lark CLI 的官方发行版。
+官方 Lark CLI 提供了多个按领域拆分的 skills。这个包只安装一个可发现的 `lark` skill，并在任务实际涉及日历、消息、文档、云盘等功能时，按需加载对应指南。这样可以保留完整能力，避免把所有领域说明长期放进 Agent 上下文。
 
-## 工作方式
+这是独立维护的 community wrapper，不是 Lark CLI 的官方发行版。
 
-```text
-Agent 启动
-    │
-    ▼
-skills/lark/SKILL.md                 仅发现一个 skill
-    │
-    ├── 路由日历请求 ──► references/subskills/lark-calendar/GUIDE.md
-    ├── 路由即时消息请求 ──► references/subskills/lark-im/GUIDE.md
-    └── 路由文档请求 ──► references/subskills/lark-doc/GUIDE.md
-                                      │
-                                      ▼
-                                lark-cli --help / schema
-```
+## 背景
 
-生成的镜像会将每个嵌套的上游 `SKILL.md` 重命名为 `GUIDE.md`。这样既能保留指南及其资源，又不会让 `npx skills` 发现 27 个独立 skill。
+上游 Lark CLI 当前包含二十多个领域 skill。把它们全部预加载给 Agent，是一种拉屎式预加载：不管用户只是查日程、找文档，还是发一条消息，都先把一整套大多数时候用不上的指南塞进有限的 context。
 
-## 使用 Coding Agent 安装
+反过来，等任务来了再手工补装对应 skill，又把安装和配置成本推给每一次新需求。这个项目只保留一个 `lark` 入口，让 Agent 在真正需要某个领域时读取本地打包的指南。
 
-将以下单行提示词复制给你的 Coding Agent：
+## 是否适合你
 
-```text
-Install Lark CLI Progressive Skill globally for me by following https://github.com/OiAnthony/lark-cli-progressive-skill#readme: install only the official CLI binary with `npm install -g @larksuite/cli@latest`, install the single `lark` umbrella skill, then preview the documented global legacy-skill migration. If the preview lists any skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` well-known registry, verify every listed removal and apply it; otherwise do not apply a migration. Do not run the upstream setup wizard or install its full skill bundle.
-```
+适合：
 
-## 手动安装
+- 你通过 Coding Agent 操作飞书、Lark 或 Feishu。
+- 你希望只安装一个 `lark` skill，由 Agent 按任务加载日历、消息、文档、云盘等领域指南。
 
-### 全局安装，推荐
+不适合：
 
-全局安装官方 CLI 和唯一的 `lark` umbrella skill，然后迁移已确认来自上游的领域 skill。必须先检查迁移预览，再执行其中已确认的移除操作，安装才算完成：
+- 你需要上游 Lark CLI 的完整独立 skill bundle。
+- 你不使用支持 Skills 的 Coding Agent。
+
+## 快速开始
+
+### 环境要求
+
+- Node.js 20 或更高版本
+- npm
+- 支持 Skills 的 Coding Agent
+
+### 全局安装
+
+安装官方 CLI binary 和单一的 `lark` umbrella skill：
 
 ```bash
 npm install -g @larksuite/cli@latest
 npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
-node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global
-# Review the preview, then apply its confirmed removals.
-node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global --apply
 ```
 
-上游 setup wizard 会安装完整 skill bundle，不能与本 wrapper 一起使用，也不要单独安装该 bundle。下面两个命令都会恢复固定的上下文成本：
+### 验证安装
 
 ```bash
-# Do not combine either command with the umbrella skill.
+lark-cli config --help
+npx skills ls -g
+```
+
+列表中应包含 `lark`。首次安装时不应出现 `lark-calendar`、`lark-im`、`lark-doc` 等单独领域 skill。
+
+## 让 Coding Agent 安装
+
+把下面提示词复制给你的 Coding Agent。它会阅读本 README 并完成全局安装。只有检测到已安装的官方旧版 `lark-*` skills 时，才会预览并执行迁移。
+
+```text
+Read and follow https://github.com/OiAnthony/lark-cli-progressive-skill#readme. Install the official Lark CLI binary and the single global `lark` umbrella skill. If the documented migration preview finds legacy skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` registry, verify each listed removal and complete the documented migration. Do not run the upstream setup wizard or install the upstream full skill bundle.
+```
+
+## 首次连接飞书
+
+安装只会安装 CLI 和 skill。第一次访问飞书资源前，还需要完成应用配置和所需的用户授权。
+
+将下面的话发给你的 Coding Agent：
+
+```text
+帮我配置 Lark CLI，并用最小必要权限连接我的飞书账号。
+```
+
+Agent 会运行 `lark-cli config init`，并在需要浏览器确认时向你提供当前授权链接和二维码。完成授权后，再继续原来的任务。
+
+## 开始使用
+
+完成连接后，直接向 Coding Agent 说明目标，不需要指定领域 skill 或记忆 CLI 参数：
+
+- 列出我今天的日程。
+- 找出我最近修改的飞书文档。
+- 把当前项目中的文件上传到飞书云空间。
+- 在指定群聊中查找某条消息。
+- 创建一个任务并提醒负责人。
+
+`lark` 会先选择相关领域指南，再依据当前 CLI 的 `--help` 和 schema 执行操作。
+
+## 从旧版官方 Lark skills 迁移
+
+仅当你以前运行过以下任一命令，并已安装多个 `lark-*` skills 时，才需要迁移：
+
+```bash
 npx @larksuite/cli@latest install
 npx skills add larksuite/cli -g -y
 ```
 
-### 全局 legacy-skill 迁移
+先预览将被移除的旧 skills：
 
-安装 umbrella skill 后，上方最后两条命令会清理全局安装的上游 `larksuite/cli` 领域 skill。应用前始终检查预览。
+```bash
+node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global
+```
 
-全局迁移使用 Skills CLI 的标准目录 `$HOME/.agents/skills` 及其全局 registry，也会移除已验证、且指向这些标准 skill 的 agent 专用符号链接。
+只有预览列出的 skill 已确认来源于 `larksuite/cli`、其 GitHub repository 或官方 `open.feishu.cn` well-known registry 时，才执行：
 
-仅当 installer registry 将 `lark-*` 目录的来源标识为 `larksuite/cli`、其 GitHub repository 或官方 `open.feishu.cn` well-known skill URL 时，迁移才会删除它们，其中包括指向这些已确认全局 skill 的 agent 专用符号链接。未跟踪或第三方 `lark-*` 目录只会被报告，绝不会被删除。
+```bash
+node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global --apply
+```
 
-<details>
-<summary>项目范围安装</summary>
+迁移只会删除来源已验证的官方 `lark-*` skills，以及指向这些全局 skills 的 agent 专用符号链接。未跟踪或第三方 `lark-*` 目录只会报告，不会删除。
 
-先安装官方 CLI，再将 skill 安装到当前项目：
+不要将本包与上游完整 skill bundle 一起安装。两套机制同时存在会恢复固定的上下文成本。
+
+## 项目范围安装
+
+如果只想在当前项目中使用，安装官方 CLI 后将 skill 安装到项目目录：
 
 ```bash
 npm install -g @larksuite/cli@latest
 npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -y
 ```
 
-从项目本地 skill 目录预览并应用迁移：
+如果当前项目已有官方旧版 `lark-*` skills，先预览再执行项目范围迁移：
 
 ```bash
 node .agents/skills/lark/scripts/migrate-legacy-skills.mjs
 node .agents/skills/lark/scripts/migrate-legacy-skills.mjs --apply
 ```
 
-项目安装时，迁移会读取 `skills-lock.json` 和 `.agents/.skill-lock.json`，并且只移除已确认来自上游的 `lark-*` skill。
-
-</details>
+项目迁移会读取 `skills-lock.json` 和 `.agents/.skill-lock.json`，且只移除来源已确认的上游 `lark-*` skills。
 
 ## 更新
 
@@ -92,9 +136,54 @@ npm install -g @larksuite/cli@latest
 npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
 ```
 
-不要在本 wrapper 中运行 `lark-cli update`。该命令会更新 binary 并重新安装上游完整 skill bundle。umbrella skill 会针对每条命令抑制 CLI update 和 skill-sync notice，不会修改你的 shell configuration。
+不要运行 `lark-cli update`。该命令会更新 binary 并重新安装上游完整 skill bundle，与本包的按需加载模式冲突。
 
-## 更新生成的指南
+本 skill 会针对每条命令抑制 CLI update 和 skill-sync notice，不会修改 shell configuration。
+
+## 常见问题
+
+### 为什么全局列表里只有一个 `lark` skill？
+
+这是预期行为。`lark` 会在任务需要时加载日历、消息、文档、云盘等领域指南，不需要单独安装 `lark-calendar`、`lark-im` 或 `lark-doc`。
+
+### 为什么安装后还需要配置和授权？
+
+安装只提供 CLI 和 Agent 指南。访问你的飞书资源前，仍需完成应用配置，并按实际任务授予用户身份所需的最小权限。
+
+### 为什么不能运行 `lark-cli update`？
+
+该命令会重新安装上游完整 skill bundle。请用本 README 的更新命令分别更新 CLI binary 和 progressive skill。
+
+## 工作原理
+
+```text
+Agent startup
+    │
+    ▼
+skills/lark/SKILL.md                 one discovered skill
+    │
+    ├── Calendar request ───────────► lark-calendar/GUIDE.md
+    ├── IM request ─────────────────► lark-im/GUIDE.md
+    ├── Docs request ───────────────► lark-doc/GUIDE.md
+    └── Other Lark request ─────────► matching domain GUIDE.md
+                                          │
+                                          ▼
+                                  lark-cli --help / schema
+```
+
+生成镜像会把上游每个嵌套的 `SKILL.md` 重命名为 `GUIDE.md`。这样可以保留指南和资源，同时避免 `npx skills` 发现多个独立 skill。
+
+这个设计参考了 [larksuite/cli#1392](https://github.com/larksuite/cli/issues/1392)。
+
+## 安全行为
+
+- 不暴露长期凭证，也不保留 device code 或 authorization URL 作为可复用状态。
+- 当 `config init` 或 `auth login` 需要浏览器授权时，将当前 authorization URL 和二维码交给用户。
+- 使用 `lark-cli` 前只加载相关领域指南。
+- 以当前 CLI 的 `--help` 和 schema 为准，不在 prompt 上下文中保留大量 flag 和 resource inventory。
+- 保留领域指南中关于发送、删除、审批和权限变更的确认规则。
+
+## 维护者指南
 
 源镜像由固定的上游 Lark CLI commit 生成：
 
@@ -106,28 +195,17 @@ npm run check
 
 `upstream.lock.json` schema 2 记录上游 commit、`skillsTree` Git tree SHA，以及每个镜像源文件的 SHA-256 hash。重复同步只会查询上游 commit 和 `skills` tree。tree SHA 未变化时，不会下载或重写指南。
 
-GitHub Actions 每日运行此检查。仅在镜像确实产生 diff，且通过 `npm test` 和 `npm run check` 时，才会创建或更新唯一的 `automation/sync-lark-skills` pull request。合并前请检查生成指南的变更，尤其是 authentication、authorization、sending、deletion、approval 和 permission workflow。
+GitHub Actions 每日运行此检查。仅当镜像产生 diff，且通过 `npm test` 和 `npm run check` 时，才会创建或更新唯一的 `automation/sync-lark-skills` pull request。合并前应检查生成指南的变更，尤其是 authentication、authorization、sending、deletion、approval 和 permission workflow。
 
-## 验证
+在仓库中验证包结构：
 
 ```bash
 npm test
 npm run check
 npx skills add . --list
-npx skills ls -g
 ```
 
-包列表必须只报告一个可用 skill，即 `lark`。完成全局安装或迁移后，全局列表必须包含 `lark`，且不包含任何 `lark-*` 领域 skill。
-
-## 安全行为
-
-router 的全局安全规则很少，但不可选：
-
-- 不暴露长期凭证，也不保留 device code 或 authorization URL 作为可复用状态。
-- 当 `config init` 或 `auth login` 需要浏览器授权时，将当前 authorization URL 转交给用户。
-- 使用 `lark-cli` 前只加载相关领域指南。
-- 使用当前 CLI 的 `--help` 和 schema，不在 prompt 上下文中保留大量 flag 和 resource inventory。
-- 保留领域指南中关于 sending、deletion、approval 和 permission change 的确认规则。
+包列表必须只报告一个可用 skill，即 `lark`。
 
 ## 致谢与许可
 

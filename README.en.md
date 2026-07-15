@@ -2,9 +2,157 @@
 
 # Lark CLI Progressive Skill
 
-An opt-in, progressive-disclosure umbrella skill for [Lark CLI](https://github.com/larksuite/cli).
+Use one `lark` skill to let a coding agent work with Lark or Feishu.
 
-The upstream package currently exposes many domain skills. This package exposes exactly one discoverable skill, `lark`, then loads the required domain guide only when a task needs it. It follows the design proposed in [larksuite/cli#1392](https://github.com/larksuite/cli/issues/1392). It is an independent wrapper, not an official Lark CLI release.
+The official Lark CLI provides skills split by domain. This package installs one discoverable `lark` skill, then loads the required guide only when a task involves calendars, messages, documents, Drive, or another Lark domain. It keeps the full capability set without holding every domain guide in the Agent context all the time.
+
+This is an independently maintained community wrapper, not an official Lark CLI release.
+
+## Background
+
+The upstream Lark CLI currently ships more than twenty domain skills. Preloading all of them into an Agent is indiscriminate context dumping: even for a calendar lookup, a document search, or a one-message task, the Agent carries a full set of guides it will usually never use.
+
+The other extreme is manually installing a domain skill only when a task arrives, which shifts installation and configuration work onto every new use case. This project provides one `lark` entry point, then directs the Agent to a locally bundled domain guide only when that domain is actually needed.
+
+## Is this for you?
+
+Use this package when:
+
+- You use a coding agent to work with Lark or Feishu.
+- You want one `lark` skill that routes the Agent to calendar, messaging, documents, Drive, and other domain guides as needed.
+
+Do not use this package when:
+
+- You need the upstream Lark CLI's complete standalone skill bundle.
+- You do not use a coding agent that supports Skills.
+
+## Quick start
+
+### Requirements
+
+- Node.js 20 or later
+- npm
+- A coding agent that supports Skills
+
+### Install globally
+
+Install the official CLI binary and the single `lark` umbrella skill:
+
+```bash
+npm install -g @larksuite/cli@latest
+npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
+```
+
+### Verify the installation
+
+```bash
+lark-cli config --help
+npx skills ls -g
+```
+
+The list should include `lark`. A fresh installation should not show standalone domain skills such as `lark-calendar`, `lark-im`, or `lark-doc`.
+
+## Install with a coding agent
+
+Copy the following prompt into your coding agent. It reads this README and completes the global installation. It previews and performs a migration only when it finds legacy official `lark-*` skills.
+
+```text
+Read and follow https://github.com/OiAnthony/lark-cli-progressive-skill#readme. Install the official Lark CLI binary and the single global `lark` umbrella skill. If the documented migration preview finds legacy skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` registry, verify each listed removal and complete the documented migration. Do not run the upstream setup wizard or install the upstream full skill bundle.
+```
+
+## Connect Lark for the first time
+
+Installation provides the CLI and the skill. Before the first request that accesses Lark resources, you still need to configure the app and authorize the required user access.
+
+Send this to your coding agent:
+
+```text
+Help me configure Lark CLI and connect my Lark account with the minimum permissions required.
+```
+
+The Agent runs `lark-cli config init` and provides the current authorization URL and QR code when browser approval is required. Complete the authorization, then continue the original task.
+
+## Start using it
+
+After connecting your account, describe the outcome to the coding agent. You do not need to name a domain skill or remember CLI arguments:
+
+- List my calendar events for today.
+- Find Lark documents that I edited recently.
+- Upload a file from this project to Lark Drive.
+- Find a message in a specific group chat.
+- Create a task and remind its owner.
+
+`lark` selects the relevant domain guide first, then uses the current CLI `--help` and schema to execute the request.
+
+## Migrate from legacy official Lark skills
+
+Migration is needed only if you previously ran either command below and have multiple `lark-*` skills installed:
+
+```bash
+npx @larksuite/cli@latest install
+npx skills add larksuite/cli -g -y
+```
+
+Preview the legacy skills that would be removed:
+
+```bash
+node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global
+```
+
+Run this command only after verifying that every listed skill is sourced from `larksuite/cli`, its GitHub repository, or the official `open.feishu.cn` well-known registry:
+
+```bash
+node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global --apply
+```
+
+Migration removes only verified official `lark-*` skills and agent-specific symlinks to those global skills. It reports untracked and third-party `lark-*` directories but never removes them.
+
+Do not install this package together with the upstream full skill bundle. Installing both restores a fixed context cost.
+
+## Install for one project
+
+To use the skill only in the current project, install the official CLI and add the skill without `-g`:
+
+```bash
+npm install -g @larksuite/cli@latest
+npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -y
+```
+
+If the project already has official legacy `lark-*` skills, preview and then apply the project-scoped migration:
+
+```bash
+node .agents/skills/lark/scripts/migrate-legacy-skills.mjs
+node .agents/skills/lark/scripts/migrate-legacy-skills.mjs --apply
+```
+
+Project migration reads `skills-lock.json` and `.agents/.skill-lock.json`, and removes only confirmed upstream `lark-*` skills.
+
+## Update
+
+Update the CLI binary and the progressive skill separately:
+
+```bash
+npm install -g @larksuite/cli@latest
+npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
+```
+
+Do not run `lark-cli update`. It updates the binary and reinstalls the upstream full skill bundle, which conflicts with this package's progressive-loading model.
+
+This skill suppresses the CLI update and skill-sync notices for each command. It does not modify your shell configuration.
+
+## FAQ
+
+### Why does the global list contain only `lark`?
+
+That is expected. `lark` loads the calendar, messaging, document, Drive, and other domain guides only when a task needs them. You do not need to install `lark-calendar`, `lark-im`, or `lark-doc` separately.
+
+### Why do I still need configuration and authorization after installation?
+
+Installation provides the CLI and Agent guides. Accessing your Lark resources still requires app configuration and the minimum user permissions needed for the task.
+
+### Why must I not run `lark-cli update`?
+
+That command reinstalls the upstream full skill bundle. Use the update commands in this README to update the CLI binary and progressive skill separately.
 
 ## How it works
 
@@ -14,87 +162,28 @@ Agent startup
     ▼
 skills/lark/SKILL.md                 one discovered skill
     │
-    ├── route Calendar request ──► references/subskills/lark-calendar/GUIDE.md
-    ├── route IM request ─────────► references/subskills/lark-im/GUIDE.md
-    └── route Docs request ───────► references/subskills/lark-doc/GUIDE.md
-                                      │
-                                      ▼
-                                lark-cli --help / schema
+    ├── Calendar request ───────────► lark-calendar/GUIDE.md
+    ├── IM request ─────────────────► lark-im/GUIDE.md
+    ├── Docs request ───────────────► lark-doc/GUIDE.md
+    └── Other Lark request ─────────► matching domain GUIDE.md
+                                          │
+                                          ▼
+                                  lark-cli --help / schema
 ```
 
-The generated mirror deliberately renames every nested upstream `SKILL.md` to `GUIDE.md`. That prevents `npx skills` from discovering 27 separate skills while preserving each guide and its bundled resources.
+The generated mirror renames every nested upstream `SKILL.md` to `GUIDE.md`. That preserves the guides and their resources while preventing `npx skills` from discovering many standalone skills.
 
-## Install with a coding agent
+The design follows the approach proposed in [larksuite/cli#1392](https://github.com/larksuite/cli/issues/1392).
 
-Copy this one-line prompt into your coding agent:
+## Security behavior
 
-```text
-Install Lark CLI Progressive Skill globally for me by following https://github.com/OiAnthony/lark-cli-progressive-skill#readme: install only the official CLI binary with `npm install -g @larksuite/cli@latest`, install the single `lark` umbrella skill, then preview the documented global legacy-skill migration. If the preview lists any skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` well-known registry, verify every listed removal and apply it; otherwise do not apply a migration. Do not run the upstream setup wizard or install its full skill bundle.
-```
+- It does not expose long-lived credentials or retain device codes or authorization URLs as reusable state.
+- When `config init` or `auth login` requires browser approval, it passes the current authorization URL and QR code to the user.
+- It loads only the relevant domain guide before using `lark-cli`.
+- It uses the current CLI `--help` and schema instead of retaining large flag and resource inventories in prompt context.
+- It preserves domain-guide confirmation rules for sending, deletion, approvals, and permission changes.
 
-## Manual installation
-
-### Global installation, recommended
-
-Install the official CLI and the single `lark` umbrella skill globally, then migrate any existing, confirmed upstream domain skills. The installation is not complete until the migration preview has been reviewed and its confirmed removals applied:
-
-```bash
-npm install -g @larksuite/cli@latest
-npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
-node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global
-# Review the preview, then apply its confirmed removals.
-node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global --apply
-```
-
-The upstream setup wizard installs the full skill bundle, so do not use it with this wrapper. Do not install that bundle separately either. Both commands would restore the fixed context cost:
-
-```bash
-# Do not combine either command with the umbrella skill.
-npx @larksuite/cli@latest install
-npx skills add larksuite/cli -g -y
-```
-
-### Global legacy-skill migration
-
-The final two commands above clean up globally installed upstream `larksuite/cli` domain skills after the umbrella skill is installed. Always review the preview before applying it.
-
-The global migration uses the Skills CLI canonical directory, `$HOME/.agents/skills`, and its global registry. It also removes validated agent-specific symlinks that point to those canonical skills.
-
-The migration removes `lark-*` directories only when its installer registry identifies their source as exactly `larksuite/cli`, its GitHub repository, or the official `open.feishu.cn` well-known skill URL, including agent-specific symlinks to those confirmed global skills. Untracked or third-party `lark-*` directories are reported but never removed.
-
-<details>
-<summary>Project-scoped installation</summary>
-
-Install the official CLI, then install the skill in the current project:
-
-```bash
-npm install -g @larksuite/cli@latest
-npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -y
-```
-
-Preview and apply a migration from the project-local skill directory:
-
-```bash
-node .agents/skills/lark/scripts/migrate-legacy-skills.mjs
-node .agents/skills/lark/scripts/migrate-legacy-skills.mjs --apply
-```
-
-For project installations, the migration reads `skills-lock.json` and `.agents/.skill-lock.json` and removes only confirmed upstream `lark-*` skills.
-
-</details>
-
-## Updating
-
-Update the CLI binary and the progressive skill separately:
-
-```bash
-npm install -g @larksuite/cli@latest
-npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
-```
-
-Do not run `lark-cli update` with this wrapper. That command updates the binary and reinstalls the upstream full skill bundle. The umbrella skill suppresses the resulting CLI update and skill-sync notices per command. It does not modify your shell configuration.
-
-## Updating the generated guides
+## Maintainer guide
 
 The source mirror is generated from a pinned upstream Lark CLI commit:
 
@@ -106,29 +195,18 @@ npm run check
 
 `upstream.lock.json` schema 2 records the upstream commit, the `skillsTree` Git tree SHA, and a SHA-256 hash for every mirrored source file. A repeated sync only queries the upstream commit and `skills` tree. When the tree SHA is unchanged, it does not download or rewrite guides.
 
-GitHub Actions runs this check daily. Only an actual mirror diff that passes `npm test` and `npm run check` creates or updates the single `automation/sync-lark-skills` pull request. Review generated guide changes before merging, especially authentication, authorization, sending, deletion, approval, and permission workflows.
+GitHub Actions runs this check daily. Only a mirror diff that passes `npm test` and `npm run check` creates or updates the single `automation/sync-lark-skills` pull request. Review generated guide changes before merging, especially authentication, authorization, sending, deletion, approval, and permission workflows.
 
-## Verification
+Verify the package structure in this repository:
 
 ```bash
 npm test
 npm run check
 npx skills add . --list
-npx skills ls -g
 ```
 
-The package listing must report exactly one available skill: `lark`. After a global installation or migration, the global listing must contain `lark` and no `lark-*` domain skills.
+The package listing must report exactly one available skill: `lark`.
 
-## Security behavior
-
-The router keeps global safety rules small but non-optional:
-
-- It does not expose long-lived credentials or retain device codes or authorization URLs as reusable state.
-- It forwards the current authorization URL to the user when `config init` or `auth login` requires browser approval.
-- It loads only the relevant domain guide before using `lark-cli`.
-- It uses current CLI `--help` and schemas rather than retaining large flag and resource inventories in prompt context.
-- It preserves domain guide confirmation rules for sending, deletion, approval, and permission changes.
-
-## Attribution
+## Attribution and license
 
 Generated guides are derived from [`larksuite/cli`](https://github.com/larksuite/cli), licensed under MIT. The generated lockfile records the exact upstream commit. This repository is independently maintained and is not affiliated with Lark or Lark Suite.
