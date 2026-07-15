@@ -1,12 +1,12 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-15T07:05:24.966Z",
+  "generatedAt": "2026-07-15T22:56:30.110Z",
   "upstream": {
     "owner": "larksuite",
     "repo": "cli",
     "ref": "main",
-    "commit": "49b4ccceb9d26da51c30273bc4198ea64bd46271",
-    "skillsTree": "b7d8877939819f54b5255e6bdb8cc848dc896be1"
+    "commit": "80b36453621b6b5cb205ba4013244a87b340fed7",
+    "skillsTree": "129da5541a36549590f2910ce61f9b262dbee557"
   },
   "skills": [
     "lark-approval",
@@ -134,6 +134,11 @@
       "sha256": "2e1395317395f3988d28bb4ffb99cf867060a88dc6d15d131cba1c24e7a20ea7"
     },
     {
+      "sourcePath": "skills/lark-apps/references/lark-apps-automation.md",
+      "targetPath": "lark-apps/references/lark-apps-automation.md",
+      "sha256": "07d5f844378571b0e6ba31a7283547621fa523ecb8d55bd64062cc93839911b1"
+    },
+    {
       "sourcePath": "skills/lark-apps/references/lark-apps-cloud-dev.md",
       "targetPath": "lark-apps/references/lark-apps-cloud-dev.md",
       "sha256": "9ed2bb2e0fc1eb5f7e0a274651f200703e7c9a0d9ffc56faae2672d9713f6aec"
@@ -251,7 +256,7 @@
     {
       "sourcePath": "skills/lark-apps/SKILL.md",
       "targetPath": "lark-apps/GUIDE.md",
-      "sha256": "55c72adc80f1c693e1905d6e8b4f0a0c9e916f4e194ed8551586cc1256f02173"
+      "sha256": "23c09e6acd9c157be4f132b2a2ba12843fe6a12d4c234db4615fc455f2ca1d2c"
     },
     {
       "sourcePath": "skills/lark-attendance/SKILL.md",
@@ -391,7 +396,7 @@
     {
       "sourcePath": "skills/lark-calendar/references/lark-calendar-create.md",
       "targetPath": "lark-calendar/references/lark-calendar-create.md",
-      "sha256": "aab9c603deae0bee529543ec9d7c980769f4c878d2ed79a1441c1918dedb43a2"
+      "sha256": "e0d90e6dd1e55dde57d2709712422c8f4cb02fe05e2dc731307f3a09d85b5787"
     },
     {
       "sourcePath": "skills/lark-calendar/references/lark-calendar-meeting.md",
@@ -1816,7 +1821,7 @@
     {
       "sourcePath": "skills/lark-vc-agent/references/lark-vc-agent-meeting-events.md",
       "targetPath": "lark-vc-agent/references/lark-vc-agent-meeting-events.md",
-      "sha256": "e1608e2bf414bcce955995921b7ab02f85d398cf3b2a48d5db9c0d7f1d4ed0d5"
+      "sha256": "43d5d821cad4bbec4b7768950d017c39a7527fc50ec44d571aa583612e4fbc6b"
     },
     {
       "sourcePath": "skills/lark-vc-agent/references/lark-vc-agent-meeting-join.md",
@@ -1831,7 +1836,7 @@
     {
       "sourcePath": "skills/lark-vc-agent/references/lark-vc-agent-meeting-list-active.md",
       "targetPath": "lark-vc-agent/references/lark-vc-agent-meeting-list-active.md",
-      "sha256": "a22f9670eb0f9cd4b7d6c166f87d9ee83a4b7b6750875f8ed3987a15f96085e4"
+      "sha256": "7fb7718521d3f574ec8dac1fe62c9ca10969dea99da5e1fa82931c4ae97c1bfd"
     },
     {
       "sourcePath": "skills/lark-vc-agent/references/lark-vc-agent-meeting-message-send.md",
@@ -1841,7 +1846,7 @@
     {
       "sourcePath": "skills/lark-vc-agent/SKILL.md",
       "targetPath": "lark-vc-agent/GUIDE.md",
-      "sha256": "1e5bdea8115ffffd73af08f858aaf3a691e37c25259518e45fc548e9620dfb7c"
+      "sha256": "177738846b9b23ac4ee2a9a31af142d102291b64ea3f52d9063a6660a111f52a"
     },
     {
       "sourcePath": "skills/lark-vc/references/lark-vc-detail.md",
