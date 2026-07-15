@@ -1,47 +1,52 @@
+[中文](README.md) | [English](README.en.md)
+
 # Lark CLI Progressive Skill
 
-An opt-in, progressive-disclosure umbrella skill for [Lark CLI](https://github.com/larksuite/cli).
+面向 [Lark CLI](https://github.com/larksuite/cli) 的可选渐进式加载 umbrella skill。
 
-The upstream package currently exposes many domain skills. This package exposes exactly one discoverable skill, `lark`, then loads the required domain guide only when a task needs it. It follows the design proposed in [larksuite/cli#1392](https://github.com/larksuite/cli/issues/1392); it is an independent wrapper, not an official Lark CLI release.
+上游包目前暴露了多个领域 skill。本包只暴露一个可发现的 `lark` skill，并且只在任务需要时加载对应领域指南。它采用了 [larksuite/cli#1392](https://github.com/larksuite/cli/issues/1392) 提出的设计思路，是独立维护的 wrapper，不是 Lark CLI 的官方发行版。
 
-## Design
+## 工作方式
 
 ```text
-Agent startup
+Agent 启动
     │
     ▼
-skills/lark/SKILL.md                 one discovered skill
+skills/lark/SKILL.md                 仅发现一个 skill
     │
-    ├── route Calendar request ──► references/subskills/lark-calendar/GUIDE.md
-    ├── route IM request ─────────► references/subskills/lark-im/GUIDE.md
-    └── route Docs request ───────► references/subskills/lark-doc/GUIDE.md
+    ├── 路由日历请求 ──► references/subskills/lark-calendar/GUIDE.md
+    ├── 路由即时消息请求 ──► references/subskills/lark-im/GUIDE.md
+    └── 路由文档请求 ──► references/subskills/lark-doc/GUIDE.md
                                       │
                                       ▼
                                 lark-cli --help / schema
 ```
 
-The generated mirror deliberately renames every nested upstream `SKILL.md` to `GUIDE.md`. That prevents `npx skills` from discovering 27 separate skills while preserving each guide and its bundled resources.
+生成的镜像会将每个嵌套的上游 `SKILL.md` 重命名为 `GUIDE.md`。这样既能保留指南及其资源，又不会让 `npx skills` 发现 27 个独立 skill。
 
-## Install with a coding agent
+## 使用 Coding Agent 安装
 
-Copy this one-line prompt into your coding agent:
+将以下单行提示词复制给你的 Coding Agent：
 
 ```text
 Install Lark CLI Progressive Skill globally for me by following https://github.com/OiAnthony/lark-cli-progressive-skill#readme: install only the official CLI binary with `npm install -g @larksuite/cli@latest`, install the single `lark` umbrella skill, then preview the documented global legacy-skill migration. If the preview lists any skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` well-known registry, verify every listed removal and apply it; otherwise do not apply a migration. Do not run the upstream setup wizard or install its full skill bundle.
 ```
 
-## Manual installation
+## 手动安装
 
-### Global installation (recommended)
+### 全局安装，推荐
 
-Install the official CLI, then install the single `lark` umbrella skill globally for your coding agent:
+全局安装官方 CLI 和唯一的 `lark` umbrella skill，然后迁移已确认来自上游的领域 skill。必须先检查迁移预览，再执行其中已确认的移除操作，安装才算完成：
 
 ```bash
 npm install -g @larksuite/cli@latest
 npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
+node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global
+# Review the preview, then apply its confirmed removals.
+node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global --apply
 ```
 
-The upstream setup wizard installs the full skill bundle, so do not use it with this wrapper. Do not install that bundle separately either; both commands would restore the fixed context cost:
+上游 setup wizard 会安装完整 skill bundle，不能与本 wrapper 一起使用，也不要单独安装该 bundle。下面两个命令都会恢复固定的上下文成本：
 
 ```bash
 # Do not combine either command with the umbrella skill.
@@ -49,59 +54,49 @@ npx @larksuite/cli@latest install
 npx skills add larksuite/cli -g -y
 ```
 
-### Migrate global upstream skills
+### 全局 legacy-skill 迁移
 
-After the global installation, preview the migration of globally installed upstream `larksuite/cli` domain skills:
+安装 umbrella skill 后，上方最后两条命令会清理全局安装的上游 `larksuite/cli` 领域 skill。应用前始终检查预览。
 
-```bash
-node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global
-```
+全局迁移使用 Skills CLI 的标准目录 `$HOME/.agents/skills` 及其全局 registry，也会移除已验证、且指向这些标准 skill 的 agent 专用符号链接。
 
-Apply only after reviewing the preview:
-
-```bash
-node "$HOME/.agents/skills/lark/scripts/migrate-legacy-skills.mjs" --global --apply
-```
-
-The global migration uses the Skills CLI canonical directory, `$HOME/.agents/skills`, and its global registry. It also removes validated agent-specific symlinks that point to those canonical skills.
-
-The migration removes `lark-*` directories only when its installer registry identifies their source as exactly `larksuite/cli`, its GitHub repository, or the official `open.feishu.cn` well-known skill URL, including agent-specific symlinks to those confirmed global skills. Untracked or third-party `lark-*` directories are reported but never removed.
+仅当 installer registry 将 `lark-*` 目录的来源标识为 `larksuite/cli`、其 GitHub repository 或官方 `open.feishu.cn` well-known skill URL 时，迁移才会删除它们，其中包括指向这些已确认全局 skill 的 agent 专用符号链接。未跟踪或第三方 `lark-*` 目录只会被报告，绝不会被删除。
 
 <details>
-<summary>Project-scoped installation</summary>
+<summary>项目范围安装</summary>
 
-Install the official CLI, then install the skill in the current project:
+先安装官方 CLI，再将 skill 安装到当前项目：
 
 ```bash
 npm install -g @larksuite/cli@latest
 npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -y
 ```
 
-Preview and apply a migration from the project-local skill directory:
+从项目本地 skill 目录预览并应用迁移：
 
 ```bash
 node .agents/skills/lark/scripts/migrate-legacy-skills.mjs
 node .agents/skills/lark/scripts/migrate-legacy-skills.mjs --apply
 ```
 
-For project installations, the migration reads `skills-lock.json` and `.agents/.skill-lock.json` and removes only confirmed upstream `lark-*` skills.
+项目安装时，迁移会读取 `skills-lock.json` 和 `.agents/.skill-lock.json`，并且只移除已确认来自上游的 `lark-*` skill。
 
 </details>
 
-## Updating
+## 更新
 
-Update the CLI binary and the progressive skill separately:
+分别更新 CLI binary 和 progressive skill：
 
 ```bash
 npm install -g @larksuite/cli@latest
 npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
 ```
 
-Do not run `lark-cli update` with this wrapper. That command updates the binary and reinstalls the upstream full skill bundle. The umbrella skill suppresses the resulting CLI update and skill-sync notices per command; it does not modify your shell configuration.
+不要在本 wrapper 中运行 `lark-cli update`。该命令会更新 binary 并重新安装上游完整 skill bundle。umbrella skill 会针对每条命令抑制 CLI update 和 skill-sync notice，不会修改你的 shell configuration。
 
-## Updating the generated guides
+## 更新生成的指南
 
-The source mirror is generated from a pinned upstream Lark CLI commit:
+源镜像由固定的上游 Lark CLI commit 生成：
 
 ```bash
 npm run sync:upstream
@@ -109,11 +104,11 @@ npm test
 npm run check
 ```
 
-`upstream.lock.json` schema 2 records the upstream commit, the `skillsTree` Git tree SHA, and a SHA-256 hash for every mirrored source file. A repeated sync only queries the upstream commit and `skills` tree; when the tree SHA is unchanged it does not download or rewrite guides.
+`upstream.lock.json` schema 2 记录上游 commit、`skillsTree` Git tree SHA，以及每个镜像源文件的 SHA-256 hash。重复同步只会查询上游 commit 和 `skills` tree。tree SHA 未变化时，不会下载或重写指南。
 
-GitHub Actions runs this check daily. Only an actual mirror diff that passes `npm test` and `npm run check` creates or updates the single `automation/sync-lark-skills` pull request. Review generated guide changes before merging, especially authentication, authorization, sending, deletion, approval, and permission workflows.
+GitHub Actions 每日运行此检查。仅在镜像确实产生 diff，且通过 `npm test` 和 `npm run check` 时，才会创建或更新唯一的 `automation/sync-lark-skills` pull request。合并前请检查生成指南的变更，尤其是 authentication、authorization、sending、deletion、approval 和 permission workflow。
 
-## Verification
+## 验证
 
 ```bash
 npm test
@@ -122,18 +117,18 @@ npx skills add . --list
 npx skills ls -g
 ```
 
-The package listing must report exactly one available skill: `lark`. After a global installation or migration, the global listing must contain `lark` and no `lark-*` domain skills.
+包列表必须只报告一个可用 skill，即 `lark`。完成全局安装或迁移后，全局列表必须包含 `lark`，且不包含任何 `lark-*` 领域 skill。
 
-## Security behavior
+## 安全行为
 
-The router keeps global safety rules small but non-optional:
+router 的全局安全规则很少，但不可选：
 
-- It does not expose long-lived credentials or retain device codes / authorization URLs as reusable state.
-- It forwards the current authorization URL to the user when `config init` or `auth login` requires browser approval.
-- It loads only the relevant domain guide before using `lark-cli`.
-- It uses current CLI `--help` and schemas rather than retaining large flag and resource inventories in prompt context.
-- It preserves domain guide confirmation rules for sending, deletion, approval, and permission changes.
+- 不暴露长期凭证，也不保留 device code 或 authorization URL 作为可复用状态。
+- 当 `config init` 或 `auth login` 需要浏览器授权时，将当前 authorization URL 转交给用户。
+- 使用 `lark-cli` 前只加载相关领域指南。
+- 使用当前 CLI 的 `--help` 和 schema，不在 prompt 上下文中保留大量 flag 和 resource inventory。
+- 保留领域指南中关于 sending、deletion、approval 和 permission change 的确认规则。
 
-## Attribution
+## 致谢与许可
 
-Generated guides are derived from [`larksuite/cli`](https://github.com/larksuite/cli), licensed under MIT. The generated lockfile records the exact upstream commit. This repository is independently maintained and is not affiliated with Lark or Lark Suite.
+生成的指南派生自 [`larksuite/cli`](https://github.com/larksuite/cli)，采用 MIT license。生成的 lockfile 会记录精确的上游 commit。本 repository 独立维护，与 Lark 或 Lark Suite 没有隶属关系。
