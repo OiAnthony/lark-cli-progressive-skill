@@ -1,12 +1,12 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-17T22:46:01.778Z",
+  "generatedAt": "2026-07-19T22:48:50.777Z",
   "upstream": {
     "owner": "larksuite",
     "repo": "cli",
     "ref": "main",
-    "commit": "4a56748bfa941ff0ee0bfec92e65acac427732b0",
-    "skillsTree": "7b2bda58549daa37ff6c9ef3122cde4519d852e4"
+    "commit": "44514ad1143817d0f407d4f1c0db8a537539ad29",
+    "skillsTree": "db2dcfbf23c31ced24b379988c920e3682e94b66"
   },
   "skills": [
     "lark-approval",
@@ -1726,12 +1726,12 @@
     {
       "sourcePath": "skills/lark-slides/scripts/xml_text_overlap_lint_test.py",
       "targetPath": "lark-slides/scripts/xml_text_overlap_lint_test.py",
-      "sha256": "78e4827232d50c3d85ea32150cfd1a6f2519f1c9a355d6f78b31f95df5984428"
+      "sha256": "5ffe7f72ea839230cc1eee5e04fbee2a56843e1988b2fdc435cd624edbd8dc8a"
     },
     {
       "sourcePath": "skills/lark-slides/scripts/xml_text_overlap_lint.py",
       "targetPath": "lark-slides/scripts/xml_text_overlap_lint.py",
-      "sha256": "09c544bd0ebbb1966d58cbb4c986102541a0109992477c61faf92516a22aaafc"
+      "sha256": "f591218bb2a3992b9b56bbba2c959c3025e7a01e07e6735dc78daa532f06f328"
     },
     {
       "sourcePath": "skills/lark-slides/SKILL.md",
