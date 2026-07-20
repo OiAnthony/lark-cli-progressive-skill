@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { access, cp, lstat, mkdir, mkdtemp, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { applyOverrides, validateOverrideCoverage, validateOverrides } from "./overrides.mjs";
 
 export const UPSTREAM = Object.freeze({
   owner: "larksuite",
@@ -14,23 +15,49 @@ const REVIEWED_GUIDE_REDIRECTS = new Map([
   ["skills/lark-event/references/lark-event-subscribe.md", "skills/lark-event/SKILL.md"],
 ]);
 
+const defaultFileSystem = { access, cp, lstat, mkdir, mkdtemp, readFile, readdir, rename, rm, writeFile };
+
 function sha256(content) {
   return createHash("sha256").update(content).digest("hex");
 }
 
-function skillDescription(content) {
-  const frontmatter = content.toString("utf8").match(/^---\n([\s\S]*?)\n---/);
-  const description = frontmatter?.[1].match(/^description:\s*["']?(.+?)["']?\s*$/m);
-  return description?.[1] ?? "No upstream description found.";
+function compareStrings(left, right) {
+  return left.localeCompare(right);
 }
 
 function sourceParts(sourcePath) {
+  if (typeof sourcePath !== "string" || sourcePath.includes("\\") || path.posix.normalize(sourcePath) !== sourcePath) {
+    throw new Error(`Expected a normalized POSIX source path, received: ${sourcePath}`);
+  }
   const parts = sourcePath.split("/");
-  if (parts.length < 3 || parts[0] !== "skills" || !parts[1]) {
+  if (parts.length < 3 || parts[0] !== "skills" || !parts[1] || parts.some((part) => part === "." || part === ".." || part.length === 0)) {
     throw new Error(`Expected a file below skills/<skill>/, received: ${sourcePath}`);
   }
 
   return parts;
+}
+
+function safeTargetPath(targetPath) {
+  if (
+    typeof targetPath !== "string"
+    || targetPath.includes("\\")
+    || path.posix.isAbsolute(targetPath)
+    || path.posix.normalize(targetPath) !== targetPath
+    || targetPath.split("/").some((part) => part === "." || part === ".." || part.length === 0)
+  ) {
+    throw new Error(`Expected a normalized relative target path, received: ${targetPath}`);
+  }
+  return targetPath;
+}
+
+function resolveInside(root, targetPath) {
+  const normalized = safeTargetPath(targetPath);
+  const resolvedRoot = path.resolve(root);
+  const resolved = path.resolve(resolvedRoot, ...normalized.split("/"));
+  if (!resolved.startsWith(`${resolvedRoot}${path.sep}`)) {
+    throw new Error(`Target path escapes mirror root: ${targetPath}`);
+  }
+  return resolved;
 }
 
 export function mirroredPath(sourcePath) {
@@ -76,7 +103,6 @@ export function rewriteLocalSkillLinks(markdown, { sourcePath, sourcePaths = new
     }
 
     const renamedTarget = `${target.slice(0, -"SKILL.md".length)}GUIDE.md`;
-
     if (!sourcePath || sourcePaths.has(linkedSourcePath)) {
       return match.replace(`](${target}`, `](${renamedTarget}`);
     }
@@ -111,59 +137,184 @@ export function normalizeSkillFiles(files) {
   return skills;
 }
 
-export async function writeMirror({ destination, files, source, generatedAt = new Date().toISOString() }) {
-  const skills = normalizeSkillFiles(files);
-  const resolvedDestination = path.resolve(destination);
-  const sourcePaths = new Set(files.map(({ path: sourcePath }) => sourcePath));
+function bundleDigest(entries) {
+  const manifest = entries
+    .map(({ sourcePath, targetPath, sourceSha256, outputSha256 }) => ({ sourcePath, targetPath, sourceSha256, outputSha256 }))
+    .sort((left, right) => compareStrings(left.targetPath, right.targetPath));
+  return sha256(JSON.stringify(manifest));
+}
 
-  await rm(resolvedDestination, { recursive: true, force: true });
-  await mkdir(resolvedDestination, { recursive: true });
+function overridesDigest(overrides) {
+  return sha256(JSON.stringify(overrides));
+}
+
+async function walk(directory, fileSystem = defaultFileSystem) {
+  const entries = await fileSystem.readdir(directory, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...await walk(entryPath, fileSystem));
+    } else {
+      files.push(entryPath);
+    }
+  }
+  return files;
+}
+
+export async function verifyMirror(destination, lock = null, fileSystem = defaultFileSystem) {
+  const resolvedLock = lock ?? JSON.parse(await fileSystem.readFile(path.join(destination, "upstream.lock.json"), "utf8"));
+  if (resolvedLock?.schemaVersion !== 3 || !Array.isArray(resolvedLock.files) || !Array.isArray(resolvedLock.skills)) {
+    throw new Error("Expected upstream lock schema version 3");
+  }
+
+  const actualSkills = [...normalizeSkillFiles(resolvedLock.files.map(({ sourcePath }) => ({ path: sourcePath }))).keys()].sort(compareStrings);
+  const lockedSkills = [...resolvedLock.skills].sort(compareStrings);
+  if (JSON.stringify(actualSkills) !== JSON.stringify(lockedSkills)) {
+    throw new Error("Mirror skills do not match the upstream lock entries");
+  }
+
+  const expectedFiles = new Set(["upstream.lock.json"]);
+  for (const entry of resolvedLock.files) {
+    safeTargetPath(entry.targetPath);
+    expectedFiles.add(entry.targetPath);
+    const outputPath = resolveInside(destination, entry.targetPath);
+    const outputStat = await fileSystem.lstat(outputPath);
+    if (!outputStat.isFile() || outputStat.isSymbolicLink()) {
+      throw new Error(`Expected a regular mirrored file: ${entry.targetPath}`);
+    }
+    const content = await fileSystem.readFile(outputPath);
+    const actualHash = sha256(content);
+    if (actualHash !== entry.outputSha256) {
+      throw new Error(`Output hash mismatch for ${entry.targetPath}`);
+    }
+  }
+
+  const actualFiles = (await walk(destination, fileSystem))
+    .map((file) => path.relative(destination, file).split(path.sep).join("/"))
+    .sort(compareStrings);
+  const expectedList = [...expectedFiles].sort(compareStrings);
+  if (JSON.stringify(actualFiles) !== JSON.stringify(expectedList)) {
+    throw new Error("Mirror file set does not match upstream lock");
+  }
+
+  const actualBundleDigest = bundleDigest(resolvedLock.files);
+  if (actualBundleDigest !== resolvedLock.bundleSha256) {
+    throw new Error("Mirror bundle digest does not match upstream lock");
+  }
+
+  return resolvedLock;
+}
+
+async function buildMirror({ destination, files, source, overrides, generatedAt, fileSystem }) {
+  const skills = normalizeSkillFiles(files);
+  const sourcePaths = new Set(files.map(({ path: sourcePath }) => sourcePath));
+  validateOverrides(overrides);
+  validateOverrideCoverage(sourcePaths, overrides);
+  await fileSystem.mkdir(destination, { recursive: true });
 
   const entries = [];
-  for (const file of [...files].sort((left, right) => left.path.localeCompare(right.path))) {
+  for (const file of [...files].sort((left, right) => compareStrings(left.path, right.path))) {
     const target = mirroredPath(file.path);
-    const outputPath = path.join(resolvedDestination, target);
+    const targetPath = safeTargetPath(target.split(path.sep).join("/"));
+    const outputPath = resolveInside(destination, targetPath);
     const extension = path.extname(file.path).toLowerCase();
     const original = Buffer.isBuffer(file.content) ? file.content : Buffer.from(file.content);
-    const output = extension === ".md"
+    const rewritten = extension === ".md"
       ? Buffer.from(rewriteLocalSkillLinks(original.toString("utf8"), { sourcePath: file.path, sourcePaths, source }))
       : original;
+    const output = extension === ".md"
+      ? Buffer.from(applyOverrides(rewritten.toString("utf8"), file.path, overrides).content)
+      : rewritten;
 
-    await mkdir(path.dirname(outputPath), { recursive: true });
-    await writeFile(outputPath, output);
+    await fileSystem.mkdir(path.dirname(outputPath), { recursive: true });
+    await fileSystem.writeFile(outputPath, output);
     entries.push({
       sourcePath: file.path,
-      targetPath: target.split(path.sep).join("/"),
-      sha256: sha256(original),
+      targetPath,
+      sourceSha256: sha256(original),
+      outputSha256: sha256(output),
     });
   }
 
   const lock = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     generatedAt,
     upstream: source,
-    skills: [...skills.keys()].sort(),
+    skills: [...skills.keys()].sort(compareStrings),
+    overridesSha256: overridesDigest(overrides),
+    bundleSha256: bundleDigest(entries),
     files: entries,
   };
 
-  const catalog = [...skills.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([skill, sourceFiles]) => {
-      const guide = sourceFiles.find(({ path: sourcePath }) => sourcePath === `skills/${skill}/SKILL.md`);
-      return `| \`${skill}\` | ${skillDescription(Buffer.isBuffer(guide.content) ? guide.content : Buffer.from(guide.content)).replaceAll("|", "\\|")} |`;
-    });
-
-  await writeFile(
-    path.join(resolvedDestination, "catalog.md"),
-    `# Generated Lark CLI subskill catalog\n\nRead this file only when the request cannot be routed from the umbrella skill.\n\n| Subskill | Upstream description |\n| --- | --- |\n${catalog.join("\n")}\n`,
-  );
-
-  await writeFile(
-    path.join(resolvedDestination, "upstream.lock.json"),
-    `${JSON.stringify(lock, null, 2)}\n`,
-  );
-
+  await fileSystem.writeFile(path.join(destination, "upstream.lock.json"), `${JSON.stringify(lock, null, 2)}\n`);
+  await verifyMirror(destination, lock, fileSystem);
   return lock;
+}
+
+async function pathExists(target, fileSystem) {
+  try {
+    await fileSystem.access(target);
+    return true;
+  } catch (error) {
+    if (error.code === "ENOENT") return false;
+    throw error;
+  }
+}
+
+export async function writeMirror({
+  destination,
+  files,
+  source,
+  overrides = { schemaVersion: 1, overrides: [] },
+  generatedAt = new Date().toISOString(),
+  fileSystem = defaultFileSystem,
+}) {
+  const resolvedDestination = path.resolve(destination);
+  const parent = path.dirname(resolvedDestination);
+  const basename = path.basename(resolvedDestination);
+  await fileSystem.mkdir(parent, { recursive: true });
+  const staging = await fileSystem.mkdtemp(path.join(parent, `.${basename}.staging-`));
+  const backup = `${staging}.backup`;
+  let movedExisting = false;
+  let preserveBackup = false;
+
+  try {
+    const lock = await buildMirror({ destination: staging, files, source, overrides, generatedAt, fileSystem });
+    if (await pathExists(resolvedDestination, fileSystem)) {
+      await fileSystem.rename(resolvedDestination, backup);
+      movedExisting = true;
+    }
+
+    try {
+      await fileSystem.rename(staging, resolvedDestination);
+    } catch (publishError) {
+      if (movedExisting) {
+        try {
+          await fileSystem.rename(backup, resolvedDestination);
+        } catch (rollbackError) {
+          try {
+            await fileSystem.cp(backup, resolvedDestination, { recursive: true, errorOnExist: true });
+          } catch (copyError) {
+            preserveBackup = true;
+            throw new AggregateError(
+              [publishError, rollbackError, copyError],
+              `Unable to publish or restore the mirror; the previous mirror remains at ${backup}`,
+            );
+          }
+        }
+      }
+      throw publishError;
+    }
+
+    if (movedExisting) await fileSystem.rm(backup, { recursive: true, force: true });
+    return lock;
+  } finally {
+    await fileSystem.rm(staging, { recursive: true, force: true });
+    if (!preserveBackup && await pathExists(backup, fileSystem) && await pathExists(resolvedDestination, fileSystem)) {
+      await fileSystem.rm(backup, { recursive: true, force: true });
+    }
+  }
 }
 
 async function fetchJson(url, fetchImpl, headers) {
@@ -238,9 +389,9 @@ export async function fetchUpstreamSkillFiles({
   const paths = tree.tree
     .filter((entry) => entry.type === "blob" && /^skills\/[^/]+\//.test(entry.path))
     .map((entry) => entry.path)
-    .sort();
+    .sort(compareStrings);
 
-  const files = await mapWithConcurrency(paths, 8, async (sourcePath) => {
+  const downloadedFiles = await mapWithConcurrency(paths, 8, async (sourcePath) => {
     const response = await fetchImpl(
       `https://raw.githubusercontent.com/${sourceOwner}/${sourceRepo}/${sourceCommit}/${sourcePath}`,
       { headers: { "User-Agent": "lark-cli-progressive-skill" } },
@@ -252,7 +403,10 @@ export async function fetchUpstreamSkillFiles({
     return { path: sourcePath, content: Buffer.from(await response.arrayBuffer()) };
   });
 
-  return { files, source: { owner: sourceOwner, repo: sourceRepo, ref: sourceRef, commit: sourceCommit, skillsTree: resolvedSource.skillsTree } };
+  return {
+    files: downloadedFiles,
+    source: { owner: sourceOwner, repo: sourceRepo, ref: sourceRef, commit: sourceCommit, skillsTree: resolvedSource.skillsTree },
+  };
 }
 
 function hasMatchingSource(lock, source) {
@@ -273,26 +427,35 @@ export async function syncUpstreamMirror({
   destination,
   fetchImpl = fetch,
   token = process.env.GITHUB_TOKEN,
+  overrides = { schemaVersion: 1, overrides: [] },
+  fileSystem = defaultFileSystem,
 }) {
   const lockPath = path.join(destination, "upstream.lock.json");
   const lock = await readLock(lockPath);
   const source = await fetchUpstreamVersion({ fetchImpl, token });
-
-  if (lock?.schemaVersion === 2 && hasMatchingSource(lock, source) && lock.upstream.skillsTree === source.skillsTree) {
-    return { status: "unchanged", source };
+  const sameGeneration = lock?.schemaVersion === 3
+    && hasMatchingSource(lock, source)
+    && lock.upstream.commit === source.commit
+    && lock.upstream.skillsTree === source.skillsTree
+    && lock.overridesSha256 === overridesDigest(overrides);
+  let localValid = false;
+  if (sameGeneration) {
+    try {
+      await verifyMirror(destination, lock, fileSystem);
+      localValid = true;
+    } catch {
+      // The verified upstream rebuild below repairs incomplete or modified local output.
+    }
   }
-
-  if (lock?.schemaVersion === 1 && hasMatchingSource(lock, source) && lock.upstream.commit === source.commit) {
-    const migratedLock = {
-      ...lock,
-      schemaVersion: 2,
-      upstream: { ...lock.upstream, skillsTree: source.skillsTree },
-    };
-    await writeFile(lockPath, `${JSON.stringify(migratedLock, null, 2)}\n`);
-    return { status: "migrated", source };
-  }
-
   const { files } = await fetchUpstreamSkillFiles({ source, fetchImpl, token });
-  const updatedLock = await writeMirror({ destination, files, source });
-  return { status: "updated", source, lock: updatedLock };
+  const updatedLock = await writeMirror({
+    destination,
+    files,
+    source,
+    overrides,
+    generatedAt: sameGeneration ? lock.generatedAt : new Date().toISOString(),
+    fileSystem,
+  });
+  const status = sameGeneration && localValid && lock.bundleSha256 === updatedLock.bundleSha256 ? "unchanged" : "updated";
+  return { status, source, lock: updatedLock };
 }

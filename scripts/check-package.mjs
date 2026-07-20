@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { LOCAL_MARKDOWN_LINK } from "../src/upstream.mjs";
+import { LOCAL_MARKDOWN_LINK, mirroredPath, verifyMirror } from "../src/upstream.mjs";
+import { readOverrides, validateAppliedOverrides, validateOverrideCoverage } from "../src/overrides.mjs";
+import { readDomainsManifest, renderRouting, validateDomainsManifest } from "../src/routing.mjs";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const skillRoot = path.join(repositoryRoot, "skills", "lark");
@@ -18,6 +20,7 @@ const REVIEWED_UNRESOLVED_LINKS = new Map([
     "upstream example uses url as a placeholder rather than a bundled file",
   ],
 ]);
+const allowDomainDrift = process.argv.includes("--allow-domain-drift");
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -40,6 +43,21 @@ const skillFiles = files
 assert.deepEqual(skillFiles, ["SKILL.md"], "the package must expose exactly one discoverable SKILL.md");
 
 const lock = JSON.parse(await readFile(path.join(mirrorRoot, "upstream.lock.json"), "utf8"));
+await verifyMirror(mirrorRoot, lock);
+const manifestPath = path.join(repositoryRoot, "config", "domains.json");
+const routingPath = path.join(skillRoot, "references", "routing.md");
+const manifest = validateDomainsManifest(await readDomainsManifest(manifestPath), allowDomainDrift ? null : lock.skills);
+assert.equal(
+  await readFile(routingPath, "utf8"),
+  renderRouting(manifest),
+  "references/routing.md must be generated from config/domains.json",
+);
+const overrides = await readOverrides(path.join(repositoryRoot, "config", "upstream-overrides.json"));
+validateOverrideCoverage(lock.files.map(({ sourcePath }) => sourcePath), overrides);
+await validateAppliedOverrides(
+  async (sourcePath) => readFile(path.join(mirrorRoot, mirroredPath(sourcePath)), "utf8"),
+  overrides,
+);
 for (const skill of lock.skills) {
   await access(path.join(mirrorRoot, skill, "GUIDE.md"));
 }
@@ -80,4 +98,4 @@ for (const [reviewKey, hits] of reviewedLinkHits) {
   assert.equal(hits, 1, `Reviewed unresolved link must match exactly once: ${reviewKey}`);
 }
 
-console.log(`Validated one umbrella skill, ${lock.skills.length} generated guides, ${localLinks} local Markdown links, and ${reviewedUnresolvedLinks} reviewed upstream links.`);
+console.log(`Validated one umbrella skill, ${lock.skills.length} routed guides, ${localLinks} local Markdown links, and ${reviewedUnresolvedLinks} reviewed upstream links.`);

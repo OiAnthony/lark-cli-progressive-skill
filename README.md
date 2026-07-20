@@ -160,18 +160,21 @@ npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
 Agent startup
     │
     ▼
-skills/lark/SKILL.md                 one discovered skill
+skills/lark/SKILL.md                 stable wrapper policy
+    │
+    ▼
+references/routing.md                generated routing contract
     │
     ├── Calendar request ───────────► lark-calendar/GUIDE.md
-    ├── IM request ─────────────────► lark-im/GUIDE.md
-    ├── Docs request ───────────────► lark-doc/GUIDE.md
+    ├── Live meeting request ───────► lark-vc-agent/GUIDE.md
+    ├── Meeting report request ─────► lark-workflow-meeting-summary/GUIDE.md
     └── Other Lark request ─────────► matching domain GUIDE.md
                                           │
                                           ▼
                                   lark-cli --help / schema
 ```
 
-生成镜像会把上游每个嵌套的 `SKILL.md` 重命名为 `GUIDE.md`。这样可以保留指南和资源，同时避免 `npx skills` 发现多个独立 skill。
+`config/domains.json` 是所有领域、意图边界和依赖关系的唯一来源，并生成 `references/routing.md`。生成镜像会把上游每个嵌套的 `SKILL.md` 重命名为 `GUIDE.md`，再应用 `config/upstream-overrides.json` 中精确匹配的 wrapper policy overlay。这样可以保留可审计的指南和资源，同时避免 `npx skills` 发现多个独立 skill。
 
 这个设计参考了 [larksuite/cli#1392](https://github.com/larksuite/cli/issues/1392)。
 
@@ -193,9 +196,11 @@ npm test
 npm run check
 ```
 
-`upstream.lock.json` schema 2 记录上游 commit、`skillsTree` Git tree SHA，以及每个镜像源文件的 SHA-256 hash。重复同步只会查询上游 commit 和 `skills` tree。tree SHA 未变化时，不会下载或重写指南。
+`upstream.lock.json` schema 3 记录上游 commit、`skillsTree` Git tree SHA、每个源文件和生成文件的 SHA-256，以及稳定的 bundle digest。同步会先在 staging 目录中完成链接改写、policy overlay 和完整性验证，再通过带 backup 的事务式目录替换发布；任何构建或切换失败都会自动恢复或保留旧镜像。Node.js 的跨平台文件 API 不提供目录原子交换，因此发布的两次 rename 之间存在极短的路径不可见窗口；同步应在没有其他进程读取镜像时执行。每次同步都会从当前上游 commit 下载 skills 源文件并重建确定性产物，防止本地 guide 与 lockfile 被一起修改后形成自洽但非上游的快照；上游 generation 未变化且重建 digest 一致时，保留原 `generatedAt`，因此不会产生无意义 diff。
 
-GitHub Actions 每日运行此检查。仅当镜像产生 diff，且通过 `npm test` 和 `npm run check` 时，才会创建或更新唯一的 `automation/sync-lark-skills` pull request。合并前应检查生成指南的变更，尤其是 authentication、authorization、sending、deletion、approval 和 permission workflow。
+`config/domains.json` 必须完整覆盖 lock 中的所有 domain。修改 manifest 后运行 `npm run generate:routing`，并提交生成的 `skills/lark/references/routing.md`。新增上游 domain、路由漂移、失效或重复命中的 policy overlay、文件缺失和内容篡改都会使检查失败。
+
+GitHub Actions 每日运行同步。常规镜像 diff 通过 `npm test` 和严格的 `npm run check` 后，才会创建或更新唯一的 `automation/sync-lark-skills` pull request；工作流不会自动合并。上游新增或删除 domain 时，工作流会在 relaxed integrity check 通过后仍创建 review PR，但严格 CI 会保持失败，直到维护者更新 `config/domains.json` 并重新生成 `references/routing.md`。对于修改 generated mirror 的 pull request，CI 会从上游重建镜像，任何由此产生的 generated diff 都会使验证失败。合并前必须检查生成指南的变更，尤其是 authentication、authorization、sending、deletion、approval、permission、shell command 和 update policy。
 
 在仓库中验证包结构：
 

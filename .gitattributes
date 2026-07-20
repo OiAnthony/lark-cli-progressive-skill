@@ -1,2 +1,2 @@
-# Generated upstream content is mirrored byte-for-byte except for link rewrites.
+# Generated upstream content preserves source bytes except for link rewrites and reviewed policy overlays.
 skills/lark/references/subskills/** whitespace=-trailing-space,-blank-at-eof

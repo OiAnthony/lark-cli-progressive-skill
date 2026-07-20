@@ -160,18 +160,21 @@ That command reinstalls the upstream full skill bundle. Use the update commands 
 Agent startup
     │
     ▼
-skills/lark/SKILL.md                 one discovered skill
+skills/lark/SKILL.md                 stable wrapper policy
+    │
+    ▼
+references/routing.md                generated routing contract
     │
     ├── Calendar request ───────────► lark-calendar/GUIDE.md
-    ├── IM request ─────────────────► lark-im/GUIDE.md
-    ├── Docs request ───────────────► lark-doc/GUIDE.md
+    ├── Live meeting request ───────► lark-vc-agent/GUIDE.md
+    ├── Meeting report request ─────► lark-workflow-meeting-summary/GUIDE.md
     └── Other Lark request ─────────► matching domain GUIDE.md
                                           │
                                           ▼
                                   lark-cli --help / schema
 ```
 
-The generated mirror renames every nested upstream `SKILL.md` to `GUIDE.md`. That preserves the guides and their resources while preventing `npx skills` from discovering many standalone skills.
+`config/domains.json` is the single source of truth for domains, intent boundaries, and dependencies, and generates `references/routing.md`. The mirror renames every nested upstream `SKILL.md` to `GUIDE.md`, then applies exact wrapper-policy overlays from `config/upstream-overrides.json`. This preserves auditable guides and resources while preventing `npx skills` from discovering standalone domain skills.
 
 The design follows the approach proposed in [larksuite/cli#1392](https://github.com/larksuite/cli/issues/1392).
 
@@ -193,9 +196,11 @@ npm test
 npm run check
 ```
 
-`upstream.lock.json` schema 2 records the upstream commit, the `skillsTree` Git tree SHA, and a SHA-256 hash for every mirrored source file. A repeated sync only queries the upstream commit and `skills` tree. When the tree SHA is unchanged, it does not download or rewrite guides.
+`upstream.lock.json` schema 3 records the upstream commit, the `skillsTree` Git tree SHA, SHA-256 hashes for every source and generated file, and a stable bundle digest. Sync builds link rewrites, policy overlays, and integrity checks in a staging directory, then publishes through a transactional directory replacement with a backup; any build or switch failure restores or preserves the old mirror. Node.js does not provide a cross-platform atomic directory-exchange API, so there is a brief path-visibility gap between the two publish renames; run sync when no other process is reading the mirror. Every sync downloads the skills sources from the current upstream commit and rebuilds deterministic output, preventing a locally modified guide and lockfile from becoming a self-consistent but non-upstream snapshot. When the upstream generation is unchanged and the rebuilt digest matches, sync preserves the previous `generatedAt`, so it produces no meaningless diff.
 
-GitHub Actions runs this check daily. Only a mirror diff that passes `npm test` and `npm run check` creates or updates the single `automation/sync-lark-skills` pull request. Review generated guide changes before merging, especially authentication, authorization, sending, deletion, approval, and permission workflows.
+`config/domains.json` must cover every domain in the lock. After changing the manifest, run `npm run generate:routing` and commit the generated `skills/lark/references/routing.md`. A new upstream domain, route drift, a stale or ambiguous policy overlay, a missing file, or modified generated content makes validation fail.
+
+GitHub Actions runs the sync daily. A normal mirror diff that passes `npm test` and strict `npm run check` creates or updates the single `automation/sync-lark-skills` pull request; the workflow does not merge it automatically. When upstream adds or removes a domain, the workflow runs the relaxed integrity check and still opens the review PR, but its strict CI remains red until a maintainer updates `config/domains.json` and regenerates `references/routing.md`. For pull requests that modify the generated mirror, CI rebuilds it from upstream and rejects any resulting generated diff. Before merging, review generated guide changes involving authentication, authorization, sending, deletion, approval, permissions, shell commands, and update policy.
 
 Verify the package structure in this repository:
 

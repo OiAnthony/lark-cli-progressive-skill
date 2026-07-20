@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "domains": [
+    {
+      "name": "lark-approval",
+      "intents": ["审批待办、审批实例、审批定义", "发起、同意、拒绝、转交或撤回审批"],
+      "notFor": ["普通任务和待办"]
+    },
+    {
+      "name": "lark-apps",
+      "intents": ["妙搭、Spark 或 Miaoda 应用开发与托管", "部署应用、查询运行日志、管理环境变量和自动化触发器"],
+      "notFor": ["普通软件项目开发", "云盘文件上传"]
+    },
+    {
+      "name": "lark-attendance",
+      "intents": ["查询自己的考勤打卡记录"],
+      "notFor": ["日程或会议安排"]
+    },
+    {
+      "name": "lark-base",
+      "intents": ["多维表格、bitable、字段、记录、视图", "Base 表单、仪表盘、workflow 和角色权限"],
+      "notFor": ["电子表格单元格", "普通云盘文件管理"]
+    },
+    {
+      "name": "lark-calendar",
+      "intents": ["日程、忙闲、会议室、RSVP", "创建或修改未来会议安排"],
+      "notFor": ["已结束的视频会议记录", "普通任务"]
+    },
+    {
+      "name": "lark-contact",
+      "intents": ["按姓名或邮箱解析 open_id", "按 open_id 查询人员信息"],
+      "notFor": ["组织架构和部门树遍历"]
+    },
+    {
+      "name": "lark-doc",
+      "intents": ["读取和编辑 Docx 或 Wiki 文档正文", "操作文档 blocks、图片和附件"],
+      "notFor": ["文档评论和权限", "Sheets 或 Base 数据"]
+    },
+    {
+      "name": "lark-drive",
+      "intents": ["云空间文件、文件夹、上传、下载和导入", "评论、权限、订阅、版本和密级标签"],
+      "notFor": ["文档正文编辑", "Sheets 或 Base 表内数据"]
+    },
+    {
+      "name": "lark-event",
+      "intents": ["实时事件订阅和 NDJSON 消费", "机器人、长连接或流式事件处理"],
+      "notFor": ["查询静态资源状态"]
+    },
+    {
+      "name": "lark-im",
+      "intents": ["消息、群聊、reaction 和聊天附件", "交互卡片、加急、群成员和 Feed 置顶"],
+      "notFor": ["邮箱邮件", "视频会议会中消息"]
+    },
+    {
+      "name": "lark-mail",
+      "intents": ["邮件读取、搜索、草稿、发送、回复和转发", "邮件文件夹、标签、联系人和收信规则"],
+      "notFor": ["即时通讯消息", "纯联系人查询"]
+    },
+    {
+      "name": "lark-markdown",
+      "intents": ["飞书原生 Markdown 文件读取、创建、patch 和 diff"],
+      "notFor": ["将 Markdown 导入在线文档", "普通云盘管理"]
+    },
+    {
+      "name": "lark-minutes",
+      "intents": ["搜索妙记和处理 minute_token", "上传音视频、读取或编辑妙记转写和摘要"],
+      "notFor": ["按会议定位关联产物", "已知 note_id 的会议纪要"]
+    },
+    {
+      "name": "lark-note",
+      "intents": ["使用已知 note_id 查询会议纪要详情和原始逐字记录"],
+      "notFor": ["搜索会议或妙记", "读取 Docx 正文"]
+    },
+    {
+      "name": "lark-okr",
+      "intents": ["OKR 周期、目标、关键结果、对齐和进展"],
+      "notFor": ["普通任务", "绩效评估"]
+    },
+    {
+      "name": "lark-openapi-explorer",
+      "intents": ["查找和调用 CLI 尚未封装的飞书原生 OpenAPI"],
+      "notFor": ["已有 domain guide 或 CLI 命令覆盖的操作"]
+    },
+    {
+      "name": "lark-shared",
+      "intents": ["CLI 配置、认证、identity、scope 和 app 权限"],
+      "notFor": ["直接处理业务资源"],
+      "internal": true
+    },
+    {
+      "name": "lark-sheets",
+      "intents": ["电子表格、工作表、range、单元格、公式和样式", "图表、透视表、筛选和财务建模"],
+      "notFor": ["多维表格", "按名称搜索云盘中的表格文件"]
+    },
+    {
+      "name": "lark-skill-maker",
+      "intents": ["把飞书 API 操作封装成自定义 lark-cli Skill"],
+      "notFor": ["直接执行已有飞书业务操作"]
+    },
+    {
+      "name": "lark-slides",
+      "intents": ["创建、读取和编辑飞书幻灯片及页面"],
+      "notFor": ["独立白板", "普通文件上传下载"]
+    },
+    {
+      "name": "lark-task",
+      "intents": ["普通任务、清单、子任务、提醒和协作者", "任务附件和任务智能体"],
+      "notFor": ["审批待办"]
+    },
+    {
+      "name": "lark-vc",
+      "intents": ["搜索已结束会议", "查询会议纪要、逐字稿、待办和参会人快照"],
+      "notFor": ["进行中的会议和会中事件", "未来日程"]
+    },
+    {
+      "name": "lark-vc-agent",
+      "intents": ["加入或离开正在进行的会议", "读取会中事件、发言状态、共享内容和会中消息"],
+      "notFor": ["已结束会议、纪要和录制查询"]
+    },
+    {
+      "name": "lark-whiteboard",
+      "intents": ["读取、创建或编辑飞书白板", "使用白板图表 DSL"],
+      "notFor": ["幻灯片页面内的流程图"]
+    },
+    {
+      "name": "lark-wiki",
+      "intents": ["知识空间、空间成员和 Wiki 节点", "组织、移动或复制知识库文档节点"],
+      "notFor": ["编辑节点内的文档正文", "上传普通文件"]
+    },
+    {
+      "name": "lark-workflow-meeting-summary",
+      "intents": ["汇总一段时间内的会议纪要", "生成会议周报或结构化会议报告"],
+      "notFor": ["查询单个已知会议"],
+      "requires": ["lark-vc"]
+    },
+    {
+      "name": "lark-workflow-standup-report",
+      "intents": ["汇总指定日期的日程与未完成任务", "生成今日、明日或本周安排摘要"],
+      "notFor": ["只查询日程或只查询任务"],
+      "requires": ["lark-calendar", "lark-task"]
+    }
+  ]
+}

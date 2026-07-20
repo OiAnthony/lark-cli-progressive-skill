@@ -23,13 +23,19 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 20
-      - run: npm run sync:upstream
+      - id: upstream
+        run: npm run sync:upstream
       - run: npm test
-      - run: npm run check
+      - id: strict_check
+        continue-on-error: true
+        run: npm run check
+      - if: ${{ steps.strict_check.outcome == 'failure' }}
+        run: npm run check -- --allow-domain-drift
+      - id: change_count
+        run: echo "count=$(git status --short -- skills/lark/references/subskills | wc -l | tr -d ' ')" >> "$GITHUB_OUTPUT"
       - id: sync_date
         run: echo "date=$(TZ=Asia/Shanghai date +%F)" >> "$GITHUB_OUTPUT"
-      - id: cpr
-        uses: peter-evans/create-pull-request@v8.1.1
+      - uses: peter-evans/create-pull-request@v8.1.1
         with:
           add-paths: skills/lark/references/subskills
           branch: automation/sync-lark-skills
@@ -37,11 +43,21 @@ jobs:
           commit-message: "chore(skills): sync lark cli skills (${{ steps.sync_date.outputs.date }})"
           title: "chore(skills): sync lark cli skills"
           body: |
-            Automated mirror update from `larksuite/cli`.
+            Automated mirror update from `larksuite/cli`. This pull request requires human review because the generated guides contain executable Agent instructions.
 
-            Validated with `npm test` and `npm run check`.
-      - name: Merge generated pull request
-        if: ${{ steps.cpr.outputs.pull-request-number }}
-        run: gh pr merge --squash --delete-branch "${{ steps.cpr.outputs.pull-request-number }}"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            | Field | Value |
+            | --- | --- |
+            | Previous commit | `${{ steps.upstream.outputs.previous_commit }}` |
+            | Current commit | `${{ steps.upstream.outputs.current_commit }}` |
+            | Previous skills tree | `${{ steps.upstream.outputs.previous_tree }}` |
+            | Current skills tree | `${{ steps.upstream.outputs.current_tree }}` |
+            | Added domains | `${{ steps.upstream.outputs.added_domains }}` |
+            | Removed domains | `${{ steps.upstream.outputs.removed_domains }}` |
+            | Domains | `${{ steps.upstream.outputs.domain_count }}` |
+            | Mirrored files | `${{ steps.upstream.outputs.file_count }}` |
+            | Changed files | `${{ steps.change_count.outputs.count }}` |
+            | Applied policy overlays | `${{ steps.upstream.outputs.overlay_count }}` |
+            | Bundle SHA-256 | `${{ steps.upstream.outputs.bundle_sha256 }}` |
+            | Strict routing validation | `${{ steps.strict_check.outcome }}` |
+
+            Validated with `npm test` and `npm run check`; when only domain coverage drifts, the workflow runs the relaxed integrity check so this review PR can be created. A failed strict routing validation must be resolved by updating `config/domains.json` and `references/routing.md` before merging. Review authentication, authorization, sending, deletion, approval, permission, shell command, and update-policy changes before merging.

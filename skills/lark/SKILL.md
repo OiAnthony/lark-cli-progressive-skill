@@ -1,54 +1,35 @@
 ---
 name: lark
-description: "Use Lark CLI for Lark/Feishu/飞书 work: calendar, messages and chats, Docs, Drive files and permissions, Base, Sheets, Mail, Tasks, Wiki, meetings, approvals, attendance, OKRs, or OpenAPI. Route the request to exactly the required bundled domain guide before invoking lark-cli."
+description: "Use Lark CLI for Lark/Feishu/飞书 operations. Load only the required bundled domain guide before invoking lark-cli."
 ---
 
 # Lark CLI
 
-当用户要操作、配置、认证、诊断 Lark/Feishu/飞书 或 `lark-cli` 时使用本 skill。不要为普通代码、文案、日历概念解释或与 Lark 无关的任务加载它。
+当用户要操作、配置、认证或诊断 Lark/Feishu/飞书或 `lark-cli` 时使用本 skill。不要为普通代码、文案、概念解释或与 Lark 无关的任务加载它。
 
-## 执行顺序
+## Execution protocol
 
-1. 用下方路由表选择最小的领域集合。
-2. 读取 `references/subskills/<domain>/GUIDE.md`；不要预读其他领域。
-3. 身份、授权、scope 或 app 配置问题，再读取 `references/subskills/lark-shared/GUIDE.md`。
-4. 在假设命令或参数前，先运行 `lark-cli <service> --help`，必要时读取命令 schema。
-5. 跨领域任务按实际步骤逐个读取 guide；不相关的 guide 不进入上下文。
+1. 读取 [`references/routing.md`](references/routing.md)，选择覆盖当前执行步骤的最小 domain 集合。
+2. 只读取所选 domain 的 `GUIDE.md`；不要预读其他 domain。
+3. 仅在身份、授权、scope 或 app configuration 问题中读取 `references/subskills/lark-shared/GUIDE.md`。
+4. 调用前通过当前 CLI 的 `lark-cli <service> --help` 或 schema 确认命令和参数。
+5. 跨领域任务按执行顺序逐步加载 guide，不一次性加载全部相关领域。
+6. 仍有歧义且不同选择会改变外部副作用或授权范围时，只询问一个消歧问题。
 
-## 路由
+## Authority
 
-| 用户目标                       | Domain                  |
-| ------------------------------ | ----------------------- |
-| 日程、忙闲、会议室、RSVP       | `lark-calendar`         |
-| 消息、群聊、reaction、聊天附件 | `lark-im`               |
-| 文档内容和 blocks              | `lark-doc`              |
-| 文件、下载、评论、权限         | `lark-drive`            |
-| 原生 Markdown 文件             | `lark-markdown`         |
-| 电子表格、range、公式          | `lark-sheets`           |
-| 多维表格、字段、记录、视图     | `lark-base`             |
-| 任务、任务清单、提醒           | `lark-task`             |
-| 收件箱、草稿、发送、邮件规则   | `lark-mail`             |
-| 知识空间、Wiki 节点            | `lark-wiki`             |
-| 幻灯片                         | `lark-slides`           |
-| 联系人和用户查询               | `lark-contact`          |
-| 妙记、转写、摘要、待办         | `lark-minutes`          |
-| 会议记录和会议产物             | `lark-vc`               |
-| 审批                           | `lark-approval`         |
-| 考勤                           | `lark-attendance`       |
-| OKR                            | `lark-okr`              |
-| 事件订阅                       | `lark-event`            |
-| 白板或图表 DSL                 | `lark-whiteboard`       |
-| 未覆盖的开放平台 API           | `lark-openapi-explorer` |
+- 本文件定义 wrapper policy，其约束优先于同步的上游 guide。
+- 当前 CLI 的 `--help` 和 schema 是命令、参数及返回结构的事实来源。
+- Domain guide 是领域边界、工作流和风险规则的事实来源。
+- `references/routing.md` 是 domain 选择和依赖关系的事实来源。
 
-无法从表中可靠路由时，先读取 `references/subskills/catalog.md`；仍有歧义且会改变外部副作用或授权范围时，只询问一个消歧问题。
-
-## Progressive 安装约束
+## Progressive installation
 
 - 每次执行 `lark-cli` 时设置 `LARKSUITE_CLI_NO_UPDATE_NOTIFIER=1 LARKSUITE_CLI_NO_SKILLS_NOTIFIER=1`。本 skill 已内置上游领域指南，缺少独立 `lark-*` skills 是预期状态。
-- 不执行 `lark-cli update`，即使生成的领域 guide 建议这样做；该命令会重新安装上游完整 skill bundle。
-- 更新 CLI binary 时使用 `npm install -g @larksuite/cli@latest`；更新领域指南时重新安装或更新本 `lark` skill。此约束优先于生成的 guide 中的更新说明。
+- 不执行 `lark-cli update`。该命令会重新安装上游完整 skill bundle。
+- 更新 CLI binary 时使用 `npm install -g @larksuite/cli@latest`；更新领域指南时重新安装或更新本 `lark` skill。
 
-## 安全和确认
+## Safety and confirmation
 
 - 不输出 access token、refresh token、app secret 或其他长期凭证；不将 device code 或授权链接作为可复用状态保存。
 - `config init` 或 `auth login` 生成的当前授权 URL 应直接转交给用户完成浏览器授权。

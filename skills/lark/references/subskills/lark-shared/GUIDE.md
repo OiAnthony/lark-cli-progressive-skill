@@ -138,13 +138,15 @@ lark-cli 命令执行后，如果检测到新版本，JSON 输出中会包含 `_
 LARKSUITE_CLI_NO_UPDATE_NOTIFIER=1 LARKSUITE_CLI_NO_SKILLS_NOTIFIER=1 <lark-cli command>
 ```
 
-当你在输出中看到 `_notice.update` 时，先完成用户当前请求；如仍相关，再简短告知可运行：
+当你在输出中看到 `_notice.update` 时，先完成用户当前请求；如仍相关，再简短告知：当前 progressive installation 会单独更新 CLI binary 和 umbrella skill。不要执行 `lark-cli update`，因为它会重新安装上游完整 skill bundle。
+
+更新 CLI binary：
 
 ```bash
-lark-cli update
+npm install -g @larksuite/cli@latest
 ```
 
-**重要**：始终使用 `lark-cli update` 更新，它会同时更新 CLI 和 AI Skills。
+更新领域指南时，重新安装或更新 `lark` umbrella skill。
 
 ## JSON 输出契约
 

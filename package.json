@@ -8,6 +8,7 @@
     "node": ">=20"
   },
   "scripts": {
+    "generate:routing": "node scripts/generate-routing.mjs",
     "sync:upstream": "node scripts/sync-upstream.mjs",
     "check": "node scripts/check-package.mjs",
     "test": "node --test"
