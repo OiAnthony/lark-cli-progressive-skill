@@ -7,6 +7,13 @@
       "reason": "The upstream update command reinstalls the standalone skill bundle and breaks the umbrella installation model.",
       "match": "当你在输出中看到 `_notice.update` 时，先完成用户当前请求；如仍相关，再简短告知可运行：\n\n```bash\nlark-cli update\n```\n\n**重要**：始终使用 `lark-cli update` 更新，它会同时更新 CLI 和 AI Skills。",
       "replacement": "当你在输出中看到 `_notice.update` 时，先完成用户当前请求；如仍相关，再简短告知：当前 progressive installation 会单独更新 CLI binary 和 umbrella skill。不要执行 `lark-cli update`，因为它会重新安装上游完整 skill bundle。\n\n更新 CLI binary：\n\n```bash\nnpm install -g @larksuite/cli@latest\n```\n\n更新领域指南时，重新安装或更新 `lark` umbrella skill。"
+    },
+    {
+      "sourcePath": "skills/lark-apps/references/lark-apps-local-dev.md",
+      "firstSeenCommit": "ad4a6d68c79b8ee84e2087b3c7dffbb28407d2b1",
+      "reason": "Upstream changed the HTML creative-design material from a SKILL.md entrypoint to creative-design.md, while lark-apps still links to the old entrypoint.",
+      "match": "[`creative-design`](../creative-design/GUIDE.md)",
+      "replacement": "[`creative-design`](../creative-design/creative-design.md)"
     }
   ]
 }

@@ -36,6 +36,7 @@ async function assertLocalMarkdownLinksResolve(root) {
 
 const upstream = { owner: "larksuite", repo: "cli", ref: "main" };
 const emptyOverrides = { schemaVersion: 1, overrides: [] };
+const configuredOverrides = JSON.parse(await fs.readFile(new URL("../config/upstream-overrides.json", import.meta.url), "utf8"));
 const alphaBlobs = {
   "skills/lark-alpha/SKILL.md": "---\ndescription: Alpha tasks\n---\n# Alpha\n",
   "skills/lark-alpha/references/api.md": "# API\n",
@@ -103,6 +104,36 @@ test("maps every mirrored SKILL.md to GUIDE.md", () => {
     "Read [shared](../lark-shared/GUIDE.md) then [web](https://example.com/SKILL.md).",
   );
   assert.equal(rewriteLocalSkillLinks("![hover](img_key)"), "![hover](img_key)");
+});
+
+test("repairs the upstream creative-design link after renaming SKILL.md", async () => {
+  const { destination } = await createDestination();
+  const creativeDesignOverride = configuredOverrides.overrides.find(
+    ({ sourcePath }) => sourcePath === "skills/lark-apps/references/lark-apps-local-dev.md",
+  );
+  assert.ok(creativeDesignOverride);
+
+  await writeMirror({
+    destination,
+    files: [
+      { path: "skills/lark-apps/SKILL.md", content: "# Apps\n" },
+      {
+        path: "skills/lark-apps/references/lark-apps-local-dev.md",
+        content: "Load [`creative-design`](../creative-design/SKILL.md).\n",
+      },
+      { path: "skills/lark-apps/creative-design/creative-design.md", content: "# Creative design\n" },
+    ],
+    source: { owner: "example", repo: "cli", ref: "main", commit: "abc123", skillsTree: "skills-tree" },
+    overrides: { schemaVersion: configuredOverrides.schemaVersion, overrides: [creativeDesignOverride] },
+    generatedAt: "2026-07-21T00:00:00.000Z",
+  });
+
+  const localGuide = await fs.readFile(
+    path.join(destination, "lark-apps", "references", "lark-apps-local-dev.md"),
+    "utf8",
+  );
+  assert.match(localGuide, /\[`creative-design`\]\(\.\.\/creative-design\/creative-design\.md\)/);
+  await assertLocalMarkdownLinksResolve(destination);
 });
 
 test("writes a verified schema v3 single-discovery mirror", async () => {
