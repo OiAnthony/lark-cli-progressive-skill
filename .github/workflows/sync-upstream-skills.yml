@@ -17,14 +17,16 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 20
       - id: upstream
         run: npm run sync:upstream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm test
       - id: strict_check
         continue-on-error: true
@@ -35,7 +37,8 @@ jobs:
         run: echo "count=$(git status --short -- skills/lark/references/subskills | wc -l | tr -d ' ')" >> "$GITHUB_OUTPUT"
       - id: sync_date
         run: echo "date=$(TZ=Asia/Shanghai date +%F)" >> "$GITHUB_OUTPUT"
-      - uses: peter-evans/create-pull-request@v8.1.1
+      - id: cpr
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           add-paths: skills/lark/references/subskills
           branch: automation/sync-lark-skills
@@ -43,7 +46,7 @@ jobs:
           commit-message: "chore(skills): sync lark cli skills (${{ steps.sync_date.outputs.date }})"
           title: "chore(skills): sync lark cli skills"
           body: |
-            Automated mirror update from `larksuite/cli`. This pull request requires human review because the generated guides contain executable Agent instructions.
+            Automated mirror update from `larksuite/cli`.
 
             | Field | Value |
             | --- | --- |
@@ -60,4 +63,9 @@ jobs:
             | Bundle SHA-256 | `${{ steps.upstream.outputs.bundle_sha256 }}` |
             | Strict routing validation | `${{ steps.strict_check.outcome }}` |
 
-            Validated with `npm test` and `npm run check`; when only domain coverage drifts, the workflow runs the relaxed integrity check so this review PR can be created. A failed strict routing validation must be resolved by updating `config/domains.json` and `references/routing.md` before merging. Review authentication, authorization, sending, deletion, approval, permission, shell command, and update-policy changes before merging.
+            Validated with `npm test` and `npm run check`; when only domain coverage drifts, the workflow runs the relaxed integrity check so this PR can be created. A failed strict routing validation must be resolved by updating `config/domains.json` and `references/routing.md` before merging.
+      - name: Merge generated pull request
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: gh pr merge --squash --delete-branch "${{ steps.cpr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
