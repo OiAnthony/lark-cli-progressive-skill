@@ -5,7 +5,7 @@ import path from "node:path";
 import test from "node:test";
 import {
   fetchUpstreamSkillFiles,
-  LOCAL_MARKDOWN_LINK,
+  localMarkdownLinksOutsideCode,
   mirroredPath,
   rewriteLocalSkillLinks,
   syncUpstreamMirror,
@@ -28,7 +28,7 @@ async function assertLocalMarkdownLinksResolve(root) {
   const markdownFiles = (await walk(root)).filter((file) => file.endsWith(".md"));
   for (const file of markdownFiles) {
     const markdown = await fs.readFile(file, "utf8");
-    for (const match of markdown.matchAll(LOCAL_MARKDOWN_LINK)) {
+    for (const match of localMarkdownLinksOutsideCode(markdown)) {
       await fs.stat(path.resolve(path.dirname(file), match[1]));
     }
   }
@@ -104,6 +104,37 @@ test("maps every mirrored SKILL.md to GUIDE.md", () => {
     "Read [shared](../lark-shared/GUIDE.md) then [web](https://example.com/SKILL.md).",
   );
   assert.equal(rewriteLocalSkillLinks("![hover](img_key)"), "![hover](img_key)");
+});
+
+test("finds local Markdown links only outside code", () => {
+  const links = localMarkdownLinksOutsideCode([
+    "[guide](guide.md)",
+    "Use `[文本](url)` for an inline example.",
+    "```md\n[fenced](url)\n```",
+    "~~~md\n[tilde-fenced](url)\n~~~",
+    "An escaped \\` leaves [broken](missing.md) in prose before a later ` delimiter.",
+    "`\\`[escaped-closer](missing-escaped-closer.md)`",
+    "```md\n~~~\n```\n[after-backtick-fence](missing-after-backtick-fence.md)",
+    "~~~md\n`\n~~~\n[after-tilde-fence](missing-after-tilde-fence.md)\n`",
+    "```md\r\n[fenced](url)\r\n```\r\n[after-crlf-fence](missing-after-crlf-fence.md)",
+  ].join("\n"));
+
+  assert.deepEqual(links.map((match) => [match[0], match[1]]), [
+    ["[guide](guide.md)", "guide.md"],
+    ["[broken](missing.md)", "missing.md"],
+    ["[escaped-closer](missing-escaped-closer.md)", "missing-escaped-closer.md"],
+    ["[after-backtick-fence](missing-after-backtick-fence.md)", "missing-after-backtick-fence.md"],
+    ["[after-tilde-fence](missing-after-tilde-fence.md)", "missing-after-tilde-fence.md"],
+    ["[after-crlf-fence](missing-after-crlf-fence.md)", "missing-after-crlf-fence.md"],
+  ]);
+});
+
+test("does not accept a differently sized inline code delimiter", () => {
+  const links = localMarkdownLinksOutsideCode("``[mismatched-closer](missing-mismatched-closer.md)`");
+
+  assert.deepEqual(links.map((match) => [match[0], match[1]]), [
+    ["[mismatched-closer](missing-mismatched-closer.md)", "missing-mismatched-closer.md"],
+  ]);
 });
 
 test("repairs the upstream creative-design link after renaming SKILL.md", async () => {

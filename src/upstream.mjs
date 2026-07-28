@@ -9,7 +9,93 @@ export const UPSTREAM = Object.freeze({
   ref: "main",
 });
 
-export const LOCAL_MARKDOWN_LINK = /(?<!!)\[[^\]]*\]\((?![a-z][a-z0-9+.-]*:|\/\/|#|\$|\{)([^)\s#]+)(#[^)\s]+)?\)/gi;
+export const LOCAL_MARKDOWN_LINK = /(?<!!)\[[^\]]*\]\((?![a-z][a-z0-9+.-]*:|\/\/|#|\$|\{)([^)\s#]+)(#[^\)\s]+)?\)/gi;
+
+function isEscaped(markdown, index) {
+  let backslashes = 0;
+  for (let cursor = index - 1; markdown[cursor] === "\\"; cursor -= 1) backslashes += 1;
+  return backslashes % 2 === 1;
+}
+
+function nextUnescapedDelimiter(markdown, delimiter, from) {
+  let index = markdown.indexOf(delimiter, from);
+  while (index !== -1 && isEscaped(markdown, index)) {
+    index = markdown.indexOf(delimiter, index + delimiter.length);
+  }
+  return index;
+}
+
+function fencedCodeRanges(markdown) {
+  const ranges = [];
+  const openingFence = /^ {0,3}(`{3,}|~{3,})[^\r\n]*(?:\r?\n|$)/gm;
+  let opening;
+  while ((opening = openingFence.exec(markdown))) {
+    const closingFence = new RegExp(`^ {0,3}${opening[1][0]}{${opening[1].length},}[ \\t]*(?:\\r?\\n|$)`, "gm");
+    closingFence.lastIndex = openingFence.lastIndex;
+    const closing = closingFence.exec(markdown);
+    const end = closing ? closing.index + closing[0].length : markdown.length;
+    ranges.push({ start: opening.index, end });
+    openingFence.lastIndex = end;
+  }
+  return ranges;
+}
+
+function inlineCodeRanges(markdown, start, end) {
+  const ranges = [];
+  let cursor = start;
+  while (cursor < end) {
+    const opening = nextUnescapedDelimiter(markdown, "`", cursor);
+    if (opening === -1 || opening >= end) break;
+
+    let delimiterEnd = opening + 1;
+    while (markdown[delimiterEnd] === "`") delimiterEnd += 1;
+    const delimiter = markdown.slice(opening, delimiterEnd);
+    let candidateStart = delimiterEnd;
+    let closingEnd = -1;
+    while (candidateStart < end) {
+      const candidate = markdown.indexOf("`", candidateStart);
+      if (candidate === -1 || candidate >= end) break;
+
+      let candidateEnd = candidate + 1;
+      while (markdown[candidateEnd] === "`") candidateEnd += 1;
+      if (candidateEnd - candidate === delimiter.length) {
+        closingEnd = candidateEnd;
+        break;
+      }
+      candidateStart = candidateEnd;
+    }
+    if (closingEnd === -1) {
+      cursor = delimiterEnd;
+      continue;
+    }
+
+    ranges.push({ start: opening, end: closingEnd });
+    cursor = closingEnd;
+  }
+  return ranges;
+}
+
+function codeRanges(markdown) {
+  const fencedRanges = fencedCodeRanges(markdown);
+  const ranges = [...fencedRanges];
+  let cursor = 0;
+  for (const range of fencedRanges) {
+    ranges.push(...inlineCodeRanges(markdown, cursor, range.start));
+    cursor = range.end;
+  }
+  ranges.push(...inlineCodeRanges(markdown, cursor, markdown.length));
+  return ranges.sort((left, right) => left.start - right.start || left.end - right.end);
+}
+
+export function localMarkdownLinksOutsideCode(markdown) {
+  const ranges = codeRanges(markdown);
+  let rangeIndex = 0;
+  return [...markdown.matchAll(LOCAL_MARKDOWN_LINK)].filter((match) => {
+    while (ranges[rangeIndex]?.end <= match.index) rangeIndex += 1;
+    const range = ranges[rangeIndex];
+    return !range || match.index < range.start || match.index >= range.end;
+  });
+}
 
 const REVIEWED_GUIDE_REDIRECTS = new Map([
   ["skills/lark-event/references/lark-event-subscribe.md", "skills/lark-event/SKILL.md"],

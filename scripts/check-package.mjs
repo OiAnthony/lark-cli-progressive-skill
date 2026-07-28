@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { LOCAL_MARKDOWN_LINK, mirroredPath, verifyMirror } from "../src/upstream.mjs";
+import { localMarkdownLinksOutsideCode, mirroredPath, verifyMirror } from "../src/upstream.mjs";
 import { readOverrides, validateAppliedOverrides, validateOverrideCoverage } from "../src/overrides.mjs";
 import { readDomainsManifest, renderRouting, validateDomainsManifest } from "../src/routing.mjs";
 
@@ -14,10 +14,6 @@ const REVIEWED_UNRESOLVED_LINKS = new Map([
   [
     "references/subskills/lark-minutes/references/lark-minutes-speaker-replace.md::../../lark-vc/references/lark-vc-notes.md",
     "upstream removed the linked lark-vc reference without an equivalent guide path",
-  ],
-  [
-    "references/subskills/lark-minutes/references/lark-minutes-summary.md::url",
-    "upstream example uses url as a placeholder rather than a bundled file",
   ],
 ]);
 const allowDomainDrift = process.argv.includes("--allow-domain-drift");
@@ -68,7 +64,7 @@ const reviewedLinkHits = new Map([...REVIEWED_UNRESOLVED_LINKS.keys()].map((key)
 for (const file of files.filter((candidate) => candidate.endsWith(".md"))) {
   const markdown = await readFile(file, "utf8");
   const relativeFile = path.relative(skillRoot, file).split(path.sep).join("/");
-  for (const match of markdown.matchAll(LOCAL_MARKDOWN_LINK)) {
+  for (const match of localMarkdownLinksOutsideCode(markdown)) {
     const reviewReason = REVIEWED_UNRESOLVED_LINKS.get(`${relativeFile}::${match[1]}`);
     if (reviewReason) {
       const destination = path.resolve(path.dirname(file), match[1]);
