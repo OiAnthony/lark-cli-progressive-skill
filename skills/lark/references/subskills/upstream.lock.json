@@ -1,11 +1,11 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-08-01T22:53:18.656Z",
+  "generatedAt": "2026-08-02T22:53:48.096Z",
   "upstream": {
     "owner": "larksuite",
     "repo": "cli",
     "ref": "main",
-    "commit": "a8ad44ba132a456006656d27dcfb21c0430a78fc",
+    "commit": "40a0a9de66f254e10a845936c072ea432d41b0c6",
     "skillsTree": "cef3d5f923d230e4c61bf6614b42b3aa29cc10fc"
   },
   "skills": [
@@ -38,7 +38,7 @@
     "lark-workflow-standup-report"
   ],
   "overridesSha256": "a450b0cc7413b864a6bb3ab8935e55970b2654b42321e79fb51a2412022a1ba8",
-  "bundleSha256": "19116a6e309fb19494c1f4f8602a6b81a6d18e9bbdf189ddf10e45148917556d",
+  "bundleSha256": "6e8c0f772f51e4204557fe5c2a9363c0ccb883d5908549356cf3600607547ffa",
   "files": [
     {
       "sourcePath": "skills/lark-approval/references/lark-approval-approvals-get.md",
@@ -1202,7 +1202,7 @@
       "sourcePath": "skills/lark-event/references/lark-event-im.md",
       "targetPath": "lark-event/references/lark-event-im.md",
       "sourceSha256": "b023f08657250ae2d1b513cbeb80d4776d786b270ffc459a1bd142eae156f3a6",
-      "outputSha256": "99ba05d71122a44dd016786a75e9cc8016e5474065cc13fa5715e65732bdd2c7"
+      "outputSha256": "0a447ad4977628d5fdbc1ac508345df3dfe867b914f3a799626e70f1affdc4f3"
     },
     {
       "sourcePath": "skills/lark-event/references/lark-event-minutes.md",
