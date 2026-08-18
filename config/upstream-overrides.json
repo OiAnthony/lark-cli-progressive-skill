@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "overrides": [
     {
-      "sourcePath": "skills/lark-shared/SKILL.md",
+      "sourcePath": "skills/lark-shared/references/lark-shared-update-notice.md",
       "firstSeenCommit": "44514ad1143817d0f407d4f1c0db8a537539ad29",
       "reason": "The upstream update command reinstalls the standalone skill bundle and breaks the umbrella installation model.",
       "match": "当你在输出中看到 `_notice.update` 时，先完成用户当前请求；如仍相关，再简短告知可运行：\n\n```bash\nlark-cli update\n```\n\n**重要**：始终使用 `lark-cli update` 更新，它会同时更新 CLI 和 AI Skills。",
