@@ -62,14 +62,21 @@
       "notFor": ["将 Markdown 导入在线文档", "普通云盘管理"]
     },
     {
+      "name": "lark-meeting",
+      "intents": ["查询进行中的会议、历史会议、参会人和会议产物", "使用已知 note_id 查询会议纪要，处理逐字稿、妙记和会中互动", "发送会中消息或让应用机器人加入、离开会议"],
+      "notFor": ["预约会议、忙闲和会议室管理", "普通日程与未来会议安排"]
+    },
+    {
       "name": "lark-minutes",
-      "intents": ["搜索妙记和处理 minute_token", "上传音视频、读取或编辑妙记转写和摘要"],
-      "notFor": ["按会议定位关联产物", "已知 note_id 的会议纪要"]
+      "intents": ["兼容显式指定的旧名称，会议请求统一交由 lark-meeting"],
+      "requires": ["lark-meeting"],
+      "internal": true
     },
     {
       "name": "lark-note",
-      "intents": ["使用已知 note_id 查询会议纪要详情和原始逐字记录"],
-      "notFor": ["搜索会议或妙记", "读取 Docx 正文"]
+      "intents": ["兼容显式指定的旧名称，会议请求统一交由 lark-meeting"],
+      "requires": ["lark-meeting"],
+      "internal": true
     },
     {
       "name": "lark-okr",
@@ -109,13 +116,15 @@
     },
     {
       "name": "lark-vc",
-      "intents": ["搜索已结束会议", "查询会议纪要、逐字稿、待办和参会人快照"],
-      "notFor": ["进行中的会议和会中事件", "未来日程"]
+      "intents": ["兼容显式指定的旧名称，会议请求统一交由 lark-meeting"],
+      "requires": ["lark-meeting"],
+      "internal": true
     },
     {
       "name": "lark-vc-agent",
-      "intents": ["加入或离开正在进行的会议", "读取会中事件、发言状态、共享内容和会中消息"],
-      "notFor": ["已结束会议、纪要和录制查询"]
+      "intents": ["兼容显式指定的旧名称，会议请求统一交由 lark-meeting"],
+      "requires": ["lark-meeting"],
+      "internal": true
     },
     {
       "name": "lark-whiteboard",
@@ -131,7 +140,7 @@
       "name": "lark-workflow-meeting-summary",
       "intents": ["汇总一段时间内的会议纪要", "生成会议周报或结构化会议报告"],
       "notFor": ["查询单个已知会议"],
-      "requires": ["lark-vc"]
+      "requires": ["lark-meeting"]
     },
     {
       "name": "lark-workflow-standup-report",

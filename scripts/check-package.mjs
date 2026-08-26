@@ -10,12 +10,7 @@ import { readDomainsManifest, renderRouting, validateDomainsManifest } from "../
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const skillRoot = path.join(repositoryRoot, "skills", "lark");
 const mirrorRoot = path.join(skillRoot, "references", "subskills");
-const REVIEWED_UNRESOLVED_LINKS = new Map([
-  [
-    "references/subskills/lark-minutes/references/lark-minutes-speaker-replace.md::../../lark-vc/references/lark-vc-notes.md",
-    "upstream removed the linked lark-vc reference without an equivalent guide path",
-  ],
-]);
+const REVIEWED_UNRESOLVED_LINKS = new Map();
 const allowDomainDrift = process.argv.includes("--allow-domain-drift");
 
 async function walk(directory) {

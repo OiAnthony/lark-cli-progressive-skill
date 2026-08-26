@@ -16,8 +16,14 @@ test("routing contract covers every upstream domain", async () => {
   const lock = JSON.parse(await readFile(lockPath, "utf8"));
 
   validateDomainsManifest(manifest, lock.skills);
-  assert.equal(manifest.domains.length, 27);
-  assert.deepEqual(manifest.domains.filter(({ internal }) => internal).map(({ name }) => name), ["lark-shared"]);
+  assert.equal(manifest.domains.length, 28);
+  assert.deepEqual(manifest.domains.filter(({ internal }) => internal).map(({ name }) => name), [
+    "lark-minutes",
+    "lark-note",
+    "lark-shared",
+    "lark-vc",
+    "lark-vc-agent",
+  ]);
   assert.equal(await readFile(routingPath, "utf8"), renderRouting(manifest));
 });
 
@@ -27,10 +33,7 @@ test("routing contract preserves explicit ambiguity boundaries", async () => {
     "lark-approval",
     "lark-task",
     "lark-calendar",
-    "lark-vc",
-    "lark-vc-agent",
-    "lark-minutes",
-    "lark-note",
+    "lark-meeting",
     "lark-apps",
     "lark-workflow-meeting-summary",
     "lark-workflow-standup-report",
@@ -40,6 +43,7 @@ test("routing contract preserves explicit ambiguity boundaries", async () => {
   assert.match(routing, /审批待办/);
   assert.match(routing, /进行中的会议/);
   assert.match(routing, /已知 note_id/);
+  assert.match(routing, /统一交由 lark-meeting/);
   assert.match(routing, /妙搭/);
   assert.match(routing, /会议周报/);
   assert.match(routing, /日程与未完成任务/);

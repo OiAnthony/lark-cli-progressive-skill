@@ -166,7 +166,7 @@ skills/lark/SKILL.md                 stable wrapper policy
 references/routing.md                generated routing contract
     │
     ├── Calendar request ───────────► lark-calendar/GUIDE.md
-    ├── Live meeting request ───────► lark-vc-agent/GUIDE.md
+    ├── Meeting request ─────────────► lark-meeting/GUIDE.md
     ├── Meeting report request ─────► lark-workflow-meeting-summary/GUIDE.md
     └── Other Lark request ─────────► matching domain GUIDE.md
                                           │

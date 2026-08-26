@@ -127,7 +127,7 @@ lark-cli docs +fetch --doc Z1Fj...tnAc --scope section --start-block-id blkTitle
 |`<whiteboard>`|提取 `token`，使用 `docs +media-download`|
 |`<sheet>`、`<cite file-type="sheets">`|提取 `token` 和 `sheet-id`，转到 [`lark-sheets`](../../lark-sheets/GUIDE.md)|
 |`<bitable>`、`<cite file-type="bitable">`|提取 `token` 和 `table-id`，转到 [`lark-base`](../../lark-base/GUIDE.md)|
-|`<vc-transcribe-tab>`|提取 `vc-node-id`，使用 [`lark-note`](../../lark-note/GUIDE.md) 的 `note +detail`|
+|`<vc-transcribe-tab>`|提取 `vc-node-id`，使用 [`lark-meeting`](../../lark-meeting/GUIDE.md) 的 `note +detail`|
 |`<synced_reference>`|提取 `src-token` 和 `src-block-id`，读取源文档并定位 block|
 
 ## 参考
