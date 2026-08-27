@@ -1,12 +1,12 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-08-26T01:51:27.356Z",
+  "generatedAt": "2026-08-27T02:52:33.825Z",
   "upstream": {
     "owner": "larksuite",
     "repo": "cli",
     "ref": "main",
-    "commit": "c8f06cd167fe352bf75a02f04a304875b9a68a2d",
-    "skillsTree": "83e052fae3d9472786b531bde262005d4a2d2aa4"
+    "commit": "971e639622b2bb32421550f44b6e9fd05ba8a57b",
+    "skillsTree": "8a120959397ee79bc46a52909e81027d86b904b3"
   },
   "skills": [
     "lark-approval",
@@ -39,7 +39,7 @@
     "lark-workflow-standup-report"
   ],
   "overridesSha256": "9ec0011148fa418e3b540d902a5ee20ec697b9cf30c003185ea9b8654c297812",
-  "bundleSha256": "898521feb88093a560c6a47b1fb0b57b1640b611c9b166219aef23facffa2265",
+  "bundleSha256": "943a6723ef7dd18488ad8cb15f8187d37566e2de5fc2186f6736d88e7ee58aea",
   "files": [
     {
       "sourcePath": "skills/lark-approval/references/lark-approval-approvals-get.md",
@@ -1407,7 +1407,7 @@
       "sourcePath": "skills/lark-event/references/lark-event-im.md",
       "targetPath": "lark-event/references/lark-event-im.md",
       "sourceSha256": "b023f08657250ae2d1b513cbeb80d4776d786b270ffc459a1bd142eae156f3a6",
-      "outputSha256": "b6c2ef0e2ce3f4194df49544d4158d3ae33d080d383b83bada453dd066f89ce0"
+      "outputSha256": "fa11218bde9b88f21701f77d6873e69d2ade57f8945193e619f71b19c6425407"
     },
     {
       "sourcePath": "skills/lark-event/references/lark-event-minutes.md",
@@ -1796,8 +1796,8 @@
     {
       "sourcePath": "skills/lark-im/SKILL.md",
       "targetPath": "lark-im/GUIDE.md",
-      "sourceSha256": "10af730f4669be104898d773b91689d7ad3cf1e01b22629246b0e6f098666bb0",
-      "outputSha256": "94bdc1986c00c7f9e83c178da7eaa61fb92c41d94b699f54ad5cca76ef75a47f"
+      "sourceSha256": "8d198a86c3b2b7ce4196aa1d8ebf9a04d0b282ba2024880e3a7f7452b01c1fff",
+      "outputSha256": "86e0981e24a26fd82f8808d3ca435d59fedbebc993402ed45c62a2437cedda86"
     },
     {
       "sourcePath": "skills/lark-mail/assets/templates/job-application--resume.html",
