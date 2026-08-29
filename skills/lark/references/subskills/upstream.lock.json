@@ -1,12 +1,12 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-08-28T05:56:25.307Z",
+  "generatedAt": "2026-08-29T03:28:09.946Z",
   "upstream": {
     "owner": "larksuite",
     "repo": "cli",
     "ref": "main",
-    "commit": "decc9549b58283531cbb40d318e97ba7d0793a27",
-    "skillsTree": "135a50dc3bcf5183165a6023b73d30bd4e85bc94"
+    "commit": "6646386e0996b1ff5df640bccff834a20bcb203b",
+    "skillsTree": "fb57a854b042bc215f38b4375009e08097c79d66"
   },
   "skills": [
     "lark-approval",
@@ -39,7 +39,7 @@
     "lark-workflow-standup-report"
   ],
   "overridesSha256": "9ec0011148fa418e3b540d902a5ee20ec697b9cf30c003185ea9b8654c297812",
-  "bundleSha256": "10921f546c0b62ed169f8f50ee45b2a113d2cf60d22418d849e773e278396618",
+  "bundleSha256": "c836e25c39c920b414cb9d059ddf8a2e479451b87b7788833a98f5e489848eef",
   "files": [
     {
       "sourcePath": "skills/lark-approval/references/lark-approval-approvals-get.md",
@@ -1383,7 +1383,7 @@
       "sourcePath": "skills/lark-event/references/lark-event-im.md",
       "targetPath": "lark-event/references/lark-event-im.md",
       "sourceSha256": "b023f08657250ae2d1b513cbeb80d4776d786b270ffc459a1bd142eae156f3a6",
-      "outputSha256": "e269be1b7e3cff03cae85b0cc3e89f4404e1d782373c560653dcb68d8eb96dc4"
+      "outputSha256": "86e7fa2584d40613c23dbc7b7d7de72567f569d73d06e5013b033f2a94639b6a"
     },
     {
       "sourcePath": "skills/lark-event/references/lark-event-minutes.md",
@@ -1728,16 +1728,22 @@
       "outputSha256": "85d91c043864cf3246b70e677ee93914f6f1978cb264340df849c53fd6298d72"
     },
     {
+      "sourcePath": "skills/lark-im/references/lark-im-messages-edit.md",
+      "targetPath": "lark-im/references/lark-im-messages-edit.md",
+      "sourceSha256": "587f2f25926cfd0d0346547e0095f4f384fdd8a179a06ce52e69fb71fe90ce9f",
+      "outputSha256": "953be8e7707a85daed40e846ff0ed1c6eb17873e809227e0cb74843b77dc5aa0"
+    },
+    {
       "sourcePath": "skills/lark-im/references/lark-im-messages-mget.md",
       "targetPath": "lark-im/references/lark-im-messages-mget.md",
-      "sourceSha256": "1f8b344fffbca43608c8962fe88ef1479c5978d91f137420cee8b8f7694a6c21",
-      "outputSha256": "399356a18132ef0f0595210c70fa423a1e8a6e64f4f37e3137755aca4d1c1990"
+      "sourceSha256": "8c256c0dd60ca668e5ea2a4031c5a8778bda02923344cb747e30911ca0fa0020",
+      "outputSha256": "60932d5a6d764121e9e1e7f4f8535d2749c0e05c81a0ed03b7972270a460518b"
     },
     {
       "sourcePath": "skills/lark-im/references/lark-im-messages-reply.md",
       "targetPath": "lark-im/references/lark-im-messages-reply.md",
-      "sourceSha256": "760321ac244e99d140349cedacf5158f6857b77afbcde4df4d82eb22091a2604",
-      "outputSha256": "3bd10ae177d25b30fd433e70e30f372f04fe4bbaee883454ebe7442517ccea72"
+      "sourceSha256": "20adf8df1a9d40631a84ef544ff229f1b89df5403dfe2b92f43dadf1e45e4a26",
+      "outputSha256": "297f03d0cc31885e1b944cbd6f26f23181406917f3472e593cf6a854dda656fa"
     },
     {
       "sourcePath": "skills/lark-im/references/lark-im-messages-resources-download.md",
@@ -1754,8 +1760,8 @@
     {
       "sourcePath": "skills/lark-im/references/lark-im-messages-send.md",
       "targetPath": "lark-im/references/lark-im-messages-send.md",
-      "sourceSha256": "29de4bf9fe04eeae0815e44ee37b83a66ddf4aaba724c0213f78a18744608959",
-      "outputSha256": "a6764a42cd84ac8bc4ffbe39d76fbe8bf98357e0a34e3fe5645cdd45096ba98b"
+      "sourceSha256": "73f797c2cb65182034b6511c64df981a6582da577c1d4a917e60c3d41ffc25f9",
+      "outputSha256": "507f23f3649dba9b49d7666b0daaca26eaa466311bd66bace5c42e381426eede"
     },
     {
       "sourcePath": "skills/lark-im/references/lark-im-reactions.md",
@@ -1772,8 +1778,8 @@
     {
       "sourcePath": "skills/lark-im/SKILL.md",
       "targetPath": "lark-im/GUIDE.md",
-      "sourceSha256": "2a4f31add50b0326dbd8dd09e01c8033e96c4a8aa5585aee9a8a2402d105d597",
-      "outputSha256": "b2297f246c25a314b1e1b90ddf65866ed316d3c2e56a0ee260ac2d71e4aa54dd"
+      "sourceSha256": "8d272993a64bd892c120da2bb8c1c11083b23aefa51d5e32f2f27e9a47519791",
+      "outputSha256": "81437500c7873910d711067a533edbe064d4b9f0eec7d1ed4dafcd662c56965e"
     },
     {
       "sourcePath": "skills/lark-mail/assets/templates/job-application--resume.html",
@@ -2390,8 +2396,8 @@
     {
       "sourcePath": "skills/lark-sheets/references/lark-sheets-conditional-format.md",
       "targetPath": "lark-sheets/references/lark-sheets-conditional-format.md",
-      "sourceSha256": "3eb0c8754a79924122ed6731b70252f3ea2025558bcf3afb4fad3df369fc0077",
-      "outputSha256": "3eb0c8754a79924122ed6731b70252f3ea2025558bcf3afb4fad3df369fc0077"
+      "sourceSha256": "82311c77f3737db513cb067fe600512bd099214700c6b5cd11e4769ade915b8d",
+      "outputSha256": "82311c77f3737db513cb067fe600512bd099214700c6b5cd11e4769ade915b8d"
     },
     {
       "sourcePath": "skills/lark-sheets/references/lark-sheets-filter-view.md",
@@ -2444,8 +2450,8 @@
     {
       "sourcePath": "skills/lark-sheets/references/lark-sheets-read-data.md",
       "targetPath": "lark-sheets/references/lark-sheets-read-data.md",
-      "sourceSha256": "e6a35edbce2befe7c5f2915ffee1c532f1a436cc7b9536362d4a97a53d0ebfbc",
-      "outputSha256": "e6a35edbce2befe7c5f2915ffee1c532f1a436cc7b9536362d4a97a53d0ebfbc"
+      "sourceSha256": "a2262d3c7b2aff8c5b33248e31454b47a385b1eeb83187b231f1987cc2306b8e",
+      "outputSha256": "a2262d3c7b2aff8c5b33248e31454b47a385b1eeb83187b231f1987cc2306b8e"
     },
     {
       "sourcePath": "skills/lark-sheets/references/lark-sheets-search-replace.md",
@@ -2534,8 +2540,8 @@
     {
       "sourcePath": "skills/lark-sheets/SKILL.md",
       "targetPath": "lark-sheets/GUIDE.md",
-      "sourceSha256": "6b35d4478b5caf5d6312cab92e251fa20ab5592025198f01a66263fbe0831ced",
-      "outputSha256": "49d79e2ce749c180e553467cbbde9dc191038978fc97bbf83b6ddc295b2e34c9"
+      "sourceSha256": "8984c32687cc417080db482121c6d159579d3367a2966343c40b9b008cf7c39e",
+      "outputSha256": "a61223cd1bbd11db3bc701da4c26d67e6f5d68ce9b3aec3eb17bba532b9dc4f0"
     },
     {
       "sourcePath": "skills/lark-skill-maker/SKILL.md",
