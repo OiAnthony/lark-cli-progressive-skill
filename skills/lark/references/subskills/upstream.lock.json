@@ -1,12 +1,12 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-09-07T04:51:28.180Z",
+  "generatedAt": "2026-09-07T23:57:44.187Z",
   "upstream": {
     "owner": "larksuite",
     "repo": "cli",
     "ref": "main",
-    "commit": "7fd6ef3c07182257ce776cdc5a614e122d5bd4b3",
-    "skillsTree": "69b0f4d387ffce989ca5aab3a659b02f00a4ba1c"
+    "commit": "c2afcce1b52c95d0d5e9508fdf9ac5585f545ceb",
+    "skillsTree": "43aec6515eac332121e4a12ab68dc63b30ffee1a"
   },
   "skills": [
     "lark-approval",
@@ -39,7 +39,7 @@
     "lark-workflow-standup-report"
   ],
   "overridesSha256": "6cbe29ed80c2ff7959d467053c36051d21aacebc563546856b9befed01aa2c60",
-  "bundleSha256": "eb48ab2b18c165ba6278f478104959209d4dbec6e52cfa3a18a3fc22a209330a",
+  "bundleSha256": "61fcc40f0ad2bb48a0343f42745ccaf3391afc819ae10025afe58b35de2cc56f",
   "files": [
     {
       "sourcePath": "skills/lark-approval/references/lark-approval-approvals-get.md",
@@ -654,16 +654,22 @@
       "outputSha256": "f2c6ba350e789f52339f496ce971e871fe2b868bf9e27f4e48989d12d3b6c94b"
     },
     {
+      "sourcePath": "skills/lark-calendar/references/lark-calendar-meeting-relation.md",
+      "targetPath": "lark-calendar/references/lark-calendar-meeting-relation.md",
+      "sourceSha256": "5cd73e12cacae08a36ea5006e03fb3c180900409461fdb1a7e29fa412f23b653",
+      "outputSha256": "8a86ac95a53d031f6bf9dacfabe0c77e1fd9ebf9bc8b0fddfe5ce01ce3c26f0f"
+    },
+    {
       "sourcePath": "skills/lark-calendar/references/lark-calendar-meeting.md",
       "targetPath": "lark-calendar/references/lark-calendar-meeting.md",
-      "sourceSha256": "b3f85f24dbc4a92a040311bc2602342c33b7e4abe771938f748627eb712b8fb2",
-      "outputSha256": "b3f85f24dbc4a92a040311bc2602342c33b7e4abe771938f748627eb712b8fb2"
+      "sourceSha256": "9165c5f921be313f15cfca640752544ff1980433d985d9a2b710cd6a1a587b77",
+      "outputSha256": "9165c5f921be313f15cfca640752544ff1980433d985d9a2b710cd6a1a587b77"
     },
     {
       "sourcePath": "skills/lark-calendar/references/lark-calendar-recurring.md",
       "targetPath": "lark-calendar/references/lark-calendar-recurring.md",
-      "sourceSha256": "391baee69829ea4b2c179e4aea9a56c28dbefa38087e87835cb37924ba0acb7d",
-      "outputSha256": "391baee69829ea4b2c179e4aea9a56c28dbefa38087e87835cb37924ba0acb7d"
+      "sourceSha256": "ac9de57e36a4ce057facb62204e538201fbdcfacb6b49b24cb960a86953f3d5b",
+      "outputSha256": "ac9de57e36a4ce057facb62204e538201fbdcfacb6b49b24cb960a86953f3d5b"
     },
     {
       "sourcePath": "skills/lark-calendar/references/lark-calendar-room-find.md",
@@ -716,8 +722,8 @@
     {
       "sourcePath": "skills/lark-calendar/SKILL.md",
       "targetPath": "lark-calendar/GUIDE.md",
-      "sourceSha256": "31f26bd7c91008edfc890d3693772a14066353ac5a2c8d6b5220bd47f495982c",
-      "outputSha256": "172ef693d67d2b708126da866df2c76fb4b5e36b8a3b9a4052c2532e1bb4d5ab"
+      "sourceSha256": "970f93e1f32c83010a515d0afde634281cfd550393ce460cb7b5d7afa6dd63bb",
+      "outputSha256": "3f9d02a8dd4c62c63ce4ae71bfa8475f0ea455f8afadc0791bf0fb9b22b2eb9f"
     },
     {
       "sourcePath": "skills/lark-contact/references/lark-contact-get-user.md",
@@ -1389,7 +1395,7 @@
       "sourcePath": "skills/lark-event/references/lark-event-im.md",
       "targetPath": "lark-event/references/lark-event-im.md",
       "sourceSha256": "b023f08657250ae2d1b513cbeb80d4776d786b270ffc459a1bd142eae156f3a6",
-      "outputSha256": "d85df8941e3e4aea80f0c340bd0ef5ac6671213df6c7cf192bc04d535072a7b6"
+      "outputSha256": "7d69b21ef4d34094c0ea3b254b62997a673568fbed0c1145530cfb6146c19caf"
     },
     {
       "sourcePath": "skills/lark-event/references/lark-event-minutes.md",
@@ -1968,6 +1974,18 @@
       "outputSha256": "653b9fd90363f91b3a52bcab38c36a5721c020f792fb125fca1d41e0d37b06de"
     },
     {
+      "sourcePath": "skills/lark-mail/references/lark-mail-thread-modify.md",
+      "targetPath": "lark-mail/references/lark-mail-thread-modify.md",
+      "sourceSha256": "d6394101b55782284eb8abf3334ce5c05cec4eb7cfb3c3974c43cc9c39ec3b65",
+      "outputSha256": "28125448370b57bfed13045d190e32e163c5d01178067ef7590230753d93b55d"
+    },
+    {
+      "sourcePath": "skills/lark-mail/references/lark-mail-thread-trash.md",
+      "targetPath": "lark-mail/references/lark-mail-thread-trash.md",
+      "sourceSha256": "5d5d0de641e3f8e53c0cba6b43be42e2b64fbe9b4c4d436b78d754c1d6bd8941",
+      "outputSha256": "1418988d4b745dbfdd887b79f2af072e088866b6942b9cddcde31d953c657719"
+    },
+    {
       "sourcePath": "skills/lark-mail/references/lark-mail-thread.md",
       "targetPath": "lark-mail/references/lark-mail-thread.md",
       "sourceSha256": "ef0f803f3dc95c4012e55c3da546a9835953e56cbfdbb5fc759a3d277cee4503",
@@ -1988,8 +2006,8 @@
     {
       "sourcePath": "skills/lark-mail/SKILL.md",
       "targetPath": "lark-mail/GUIDE.md",
-      "sourceSha256": "82d73d928956f4423cf2a0d8d9ed661112b1173d0a1272c0736e90a0681997b3",
-      "outputSha256": "7930aa75f5cdb730d23364e71ac5788b16b07099ec3a583587ede9da2a18e181"
+      "sourceSha256": "3bc941ebcb7b83bfa6e61f773b0a6c3b405b291ae7bfb5842d62310230df5a97",
+      "outputSha256": "9939e9933d6b3cb87e80a5ec6eb6d0a615fc271060068257aee72056ed732ed6"
     },
     {
       "sourcePath": "skills/lark-markdown/references/lark-markdown-create.md",
@@ -2048,8 +2066,8 @@
     {
       "sourcePath": "skills/lark-meeting/references/lark-minutes-search.md",
       "targetPath": "lark-meeting/references/lark-minutes-search.md",
-      "sourceSha256": "5c7d41d5bece128bed5cf6ab3470db9437eed465519a40218af19caf1d587015",
-      "outputSha256": "5c7d41d5bece128bed5cf6ab3470db9437eed465519a40218af19caf1d587015"
+      "sourceSha256": "62c6850baf56bd5eb7ab989dbde557397fcd41fbb57955f46e0a409a5f0f8c64",
+      "outputSha256": "62c6850baf56bd5eb7ab989dbde557397fcd41fbb57955f46e0a409a5f0f8c64"
     },
     {
       "sourcePath": "skills/lark-meeting/references/lark-minutes-speaker-replace.md",
@@ -2162,14 +2180,14 @@
     {
       "sourcePath": "skills/lark-meeting/references/lark-vc-search.md",
       "targetPath": "lark-meeting/references/lark-vc-search.md",
-      "sourceSha256": "13cecdaa536400292e336ca6bd1f60bb742b04779461f5730c044f0e0a2925d8",
-      "outputSha256": "750ef82d94776f4474a94258ae51791e08089b0974e11a8edddf44a7700e6e80"
+      "sourceSha256": "11990dcdaa5c4cfe345fd3dd1b5874fbacc327bd1bd1dbc026cd9b2577189511",
+      "outputSha256": "eb729c94fe0dd62d73def4da06236871bde68987d4b19a30a393e2e8716081d1"
     },
     {
       "sourcePath": "skills/lark-meeting/scenes/create-and-edit-minutes.md",
       "targetPath": "lark-meeting/scenes/create-and-edit-minutes.md",
-      "sourceSha256": "cde32c1e75d042751951d30c50d169ee1b0d8711dc653c147d49fd5b73971487",
-      "outputSha256": "1c19af47536b1f4bf66bcffd8a7077a3174647ce262dffeeed70268d1cfdc7d5"
+      "sourceSha256": "b586fed8eb80cca08147df0bddd36a1b9b5b5f47deca10cfb25318a2c3da8754",
+      "outputSha256": "b9e3fe7d97329138d3a202dac37dda156f2cebd115f583a17efc4ffa5da18276"
     },
     {
       "sourcePath": "skills/lark-meeting/scenes/live-meeting-attend.md",
@@ -2204,8 +2222,8 @@
     {
       "sourcePath": "skills/lark-meeting/SKILL.md",
       "targetPath": "lark-meeting/GUIDE.md",
-      "sourceSha256": "87664de707ede07b5254523a603917863dc9fb41df92bc7420eff2f4b4029815",
-      "outputSha256": "f375c499e708fa9c8adc82ae28de440044004273f4d8767a335ec9eba17e3b63"
+      "sourceSha256": "663b44f1cc62c5f213052d602ff76161a77de282260863d731936956e2f300bb",
+      "outputSha256": "f8ecaa48470bef5a1ac55b9babc2df0896ba5b333808d7234a0575cc072c0941"
     },
     {
       "sourcePath": "skills/lark-minutes/SKILL.md",
@@ -2846,8 +2864,8 @@
     {
       "sourcePath": "skills/lark-slides/references/xml/slides_xml_schema_definition.xml",
       "targetPath": "lark-slides/references/xml/slides_xml_schema_definition.xml",
-      "sourceSha256": "79d6d0bd4065d408915624e923ecdd5573d94d7505944029af98cad8179ec75d",
-      "outputSha256": "79d6d0bd4065d408915624e923ecdd5573d94d7505944029af98cad8179ec75d"
+      "sourceSha256": "bc91a3d53aa2f6ac36c0583532cbd85e3d28598d13e556be46eae02ee229cb0d",
+      "outputSha256": "bc91a3d53aa2f6ac36c0583532cbd85e3d28598d13e556be46eae02ee229cb0d"
     },
     {
       "sourcePath": "skills/lark-slides/references/xml/xml-schema-quick-ref.md",
