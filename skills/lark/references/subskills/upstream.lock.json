@@ -1,12 +1,12 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-09-08T23:48:39.339Z",
+  "generatedAt": "2026-09-09T23:48:50.723Z",
   "upstream": {
     "owner": "larksuite",
     "repo": "cli",
     "ref": "main",
-    "commit": "1e91c5628897940081e02aafd9c92588733fc212",
-    "skillsTree": "cae879d1fce87a5adbc8618283cbce5a58fcc7ba"
+    "commit": "4fddd6bc3763f2105a2e31f0a992f19554aa350f",
+    "skillsTree": "525f2858aa9f292b43555100ad872f2db3c2c581"
   },
   "skills": [
     "lark-approval",
@@ -39,7 +39,7 @@
     "lark-workflow-standup-report"
   ],
   "overridesSha256": "6cbe29ed80c2ff7959d467053c36051d21aacebc563546856b9befed01aa2c60",
-  "bundleSha256": "e3eed2ee313fbef742b036632a658012691a0f160849787092f7b4c3d5d86fcc",
+  "bundleSha256": "c45d17fc6c3b460ec3c5b6bb25190f63d53b752fca1ee2dffb1ae2ceb04bc9be",
   "files": [
     {
       "sourcePath": "skills/lark-approval/references/lark-approval-approvals-get.md",
@@ -920,8 +920,8 @@
     {
       "sourcePath": "skills/lark-doc/references/lark-doc-create-workflow.md",
       "targetPath": "lark-doc/references/lark-doc-create-workflow.md",
-      "sourceSha256": "f65a912975800e74850e61f79eac07be358dc96029a5002e5bfe7eedca1d0b83",
-      "outputSha256": "f65a912975800e74850e61f79eac07be358dc96029a5002e5bfe7eedca1d0b83"
+      "sourceSha256": "f664472c088ac09d8b4b69aa3a49f35c395f1892078b637d7c7812cbc8f9fcaa",
+      "outputSha256": "f664472c088ac09d8b4b69aa3a49f35c395f1892078b637d7c7812cbc8f9fcaa"
     },
     {
       "sourcePath": "skills/lark-doc/references/lark-doc-create.md",
@@ -980,8 +980,8 @@
     {
       "sourcePath": "skills/lark-doc/references/lark-doc-script.md",
       "targetPath": "lark-doc/references/lark-doc-script.md",
-      "sourceSha256": "bb447dd11513d6494ef6d86e6610f3e0c5f2d4e625e5197bfcca4b41554afbda",
-      "outputSha256": "bb447dd11513d6494ef6d86e6610f3e0c5f2d4e625e5197bfcca4b41554afbda"
+      "sourceSha256": "7fb8a1d3031e49ef076b0f3a705b8f6527d2cd31f4797a29f4fb6adc7c29aaeb",
+      "outputSha256": "2e4524d623320794419aa170b3e5d968814f3e2120c4c27cfd665c47b05f9844"
     },
     {
       "sourcePath": "skills/lark-doc/references/lark-doc-update.md",
@@ -1010,8 +1010,8 @@
     {
       "sourcePath": "skills/lark-doc/SKILL.md",
       "targetPath": "lark-doc/GUIDE.md",
-      "sourceSha256": "1c2aa910831a117b6ef4484469a3456775cef26a00beb8b38f470ee74654fb96",
-      "outputSha256": "25b8de2ddb7b98dd608de2c5523fe3aef3e2296f6d7599975ccbea56d69524df"
+      "sourceSha256": "2786f910370662069b1b52b98508033c84baaf0bd7b0bae177426ece4ceafacc",
+      "outputSha256": "240b953b349960e957ec5edc668fe726d17d387ef2f555fe803c3def8d332021"
     },
     {
       "sourcePath": "skills/lark-drive/references/lark-drive-add-comment.md",
@@ -1395,7 +1395,7 @@
       "sourcePath": "skills/lark-event/references/lark-event-im.md",
       "targetPath": "lark-event/references/lark-event-im.md",
       "sourceSha256": "b023f08657250ae2d1b513cbeb80d4776d786b270ffc459a1bd142eae156f3a6",
-      "outputSha256": "e945ca6ab4d7013baeca38972ad2170568dec13db83d754ed0de5b5bd7a3a4ac"
+      "outputSha256": "2054630633bd3e78408d1fb3e47dda4d12b535f53d874f127d178bc8c9186f2e"
     },
     {
       "sourcePath": "skills/lark-event/references/lark-event-minutes.md",
@@ -3272,8 +3272,8 @@
     {
       "sourcePath": "skills/lark-wiki/references/lark-wiki-move.md",
       "targetPath": "lark-wiki/references/lark-wiki-move.md",
-      "sourceSha256": "02fb790307a9801d93de0175194ea4dcc8bba5194dc67969c7c97c4aa19e6d04",
-      "outputSha256": "d2adee4fc1598f094ccdf6165ff35e60804d6d90eba8d29e0eebc9659f968f40"
+      "sourceSha256": "89bfc27253a1e7c6c220fb761d091ecf577a264ca3ad11b6c4ea181675d2584d",
+      "outputSha256": "a16d1c13e01e73c3676c5a13ef79bb7b8ace1d2d02e397d1866e5cd4906c0545"
     },
     {
       "sourcePath": "skills/lark-wiki/references/lark-wiki-node-copy.md",
@@ -3284,20 +3284,20 @@
     {
       "sourcePath": "skills/lark-wiki/references/lark-wiki-node-create.md",
       "targetPath": "lark-wiki/references/lark-wiki-node-create.md",
-      "sourceSha256": "9824c68faa0e92a57b342264ce79f3e40ca33fc9baed85c33248eb606318b7e5",
-      "outputSha256": "025f6e165711f02f2322492faec48e150809a110c3842e2b7ef83c4695a995ed"
+      "sourceSha256": "dccea978d438f21515a0e099e21dc152dac7cc96da38996f042b92994093dfb7",
+      "outputSha256": "c0dfe63d463377acbba1feb41bf0fe776a94e59b1732e260d2bfd1d5fcd4d621"
     },
     {
       "sourcePath": "skills/lark-wiki/references/lark-wiki-node-delete.md",
       "targetPath": "lark-wiki/references/lark-wiki-node-delete.md",
-      "sourceSha256": "2c48931d16fc2cd6f45c78ae596644652a71f61bd1d022031a18409f45773090",
-      "outputSha256": "2c48931d16fc2cd6f45c78ae596644652a71f61bd1d022031a18409f45773090"
+      "sourceSha256": "316d3ab994ed3aac99d0f1ddc59dfe818c60638e3f30019f41105f4754dca2ab",
+      "outputSha256": "316d3ab994ed3aac99d0f1ddc59dfe818c60638e3f30019f41105f4754dca2ab"
     },
     {
       "sourcePath": "skills/lark-wiki/references/lark-wiki-node-get.md",
       "targetPath": "lark-wiki/references/lark-wiki-node-get.md",
-      "sourceSha256": "3299b7ce40192b865ec33bc42803371d62f70b344e8757d926f8d8c511e1ebd1",
-      "outputSha256": "3299b7ce40192b865ec33bc42803371d62f70b344e8757d926f8d8c511e1ebd1"
+      "sourceSha256": "74d3c17417c250bbb9fa5dc2b2d609430d49daecfc071afaaf617b5dedb3fb57",
+      "outputSha256": "74d3c17417c250bbb9fa5dc2b2d609430d49daecfc071afaaf617b5dedb3fb57"
     },
     {
       "sourcePath": "skills/lark-wiki/references/lark-wiki-node-list.md",
