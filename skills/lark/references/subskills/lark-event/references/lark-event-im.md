@@ -27,7 +27,7 @@
 
 **sender_id is open_id only**: the event payload carries no display name. Call the contact API separately if you need the sender's name.
 
-**`.content` shape depends on `message_type`** (this key uses a flat Custom schema; see [`events/im/message_receive.go`](https://github.com/larksuite/cli/blob/d1ae4727324533f30b12c866f47f25a03f21f56d/events/im/message_receive.go)):
+**`.content` shape depends on `message_type`** (this key uses a flat Custom schema; see [`events/im/message_receive.go`](https://github.com/larksuite/cli/blob/cb5a3d704379552dc61e37898e5f74798783190d/events/im/message_receive.go)):
 
 | message_type | `.content` shape | How to read |
 |---|---|---|
