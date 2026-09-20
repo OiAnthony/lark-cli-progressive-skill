@@ -2,7 +2,7 @@
 
 # Lark CLI Progressive Skill
 
-> **Deprecated (September 20, 2026):** Lark CLI now supports the suite layout natively. New users should run `lark-cli update --skills-layout suite` instead of installing this repository. This repository is retained for historical versions, migration reference, and audits of existing installations; upstream guide syncing has ended.
+> **Deprecated (September 20, 2026):** This repository is no longer maintained. Its successor is [OiAnthony/lark-suite](https://github.com/OiAnthony/lark-suite), a versioned public mirror of the official CLI `suite` layout. New users should install lark-suite instead of this repository. This repository is retained for historical versions, migration reference, and audits of existing installations; upstream guide syncing has ended.
 
 Use one `lark` skill to let a coding agent work with Lark or Feishu.
 
@@ -10,23 +10,61 @@ The official Lark CLI provides skills split by domain. This package installs one
 
 This is an independently maintained community wrapper, not an official Lark CLI release. The project is now in maintenance termination.
 
-## Migrate to the official suite layout
+## Install the successor: lark-suite
 
-Update the official CLI and install its umbrella skill:
+[lark-suite](https://github.com/OiAnthony/lark-suite) is a versioned public mirror of the official CLI `suite` layout: one umbrella entry point `lark-suite`, with each domain guide stored as `GUIDE.md` under its `references/` directory. `npx skills` records its source and folder hash, so it updates through `npx skills update` instead of `lark-cli update`.
+
+Requirement: the official CLI binary. The `lark-suite` `SKILL.md` declares `requires.bins: lark-cli`; the skill cannot run without it.
 
 ```bash
-lark-cli update --skills-layout suite
+npm install -g @larksuite/cli@latest
 ```
 
-The command installs the official `lark-suite` entry point and stores each domain guide as `GUIDE.md` under its `references/` directory. After migration, remove this repository's installed `lark` skill so that two competing entry points are not left installed.
+Install globally:
 
-If this repository or the old standalone `lark-*` skills were previously installed, inspect the global skill list before removing entries you no longer use:
+```bash
+npx skills add OiAnthony/lark-suite --skill lark-suite -g -y -a universal
+```
+
+This installs into the user-global skill directory `~/.agents/skills/lark-suite`. `-a universal` targets the canonical directory shared across agents, so writing that single location makes the skill visible to every agent that reads `~/.agents/skills`. Without it, `npx skills` also fans the same skill out to the remaining `.agents/skills`-based agents and reports an extra PromptScript global-install failure (see [vercel-labs/skills#1352](https://github.com/vercel-labs/skills/issues/1352)).
+
+Install for one project (drop `-g`):
+
+```bash
+npx skills add OiAnthony/lark-suite --skill lark-suite -y
+```
+
+Update:
+
+```bash
+npx skills update lark-suite -g -y
+```
+
+Verify:
 
 ```bash
 npx skills ls -g
 ```
 
-The official suite layout now covers this project's core installation goal. This repository no longer provides ongoing upstream synchronization.
+The list should include `lark-suite`, sourced from `OiAnthony/lark-suite`.
+
+### Remove this repository's old entry point
+
+```bash
+npx skills remove lark -g -y
+```
+
+If the old standalone official `lark-*` skills were also installed, inspect the full list with `npx skills ls -g` and remove the entries you no longer use so that competing entry points are not left installed.
+
+### Relationship to `lark-cli update --skills-layout suite`
+
+The official CLI can install the same suite layout directly:
+
+```bash
+lark-cli update --skills-layout suite
+```
+
+The name `lark-suite` is reserved by the official CLI. Both paths write to the same skill directory (`~/.agents/skills/lark-suite`) and differ only in management: the CLI path records install state in `~/.lark-cli/skills-state.json`, while the repository path is tracked by `npx skills` with its source and hash. Pick one path; using both leaves the recorded source and update method inconsistent.
 
 ## Background
 
@@ -48,7 +86,7 @@ Do not use this package when:
 
 ## Historical installation method
 
-The following is retained only for existing users reviewing the historical installation method. New users should use the official suite layout migration command above.
+The following is retained only for existing users reviewing the historical installation method. New users should use the [lark-suite install commands](#install-the-successor-lark-suite) above.
 
 ```text
 Read and follow https://github.com/OiAnthony/lark-cli-progressive-skill#readme. Install the official Lark CLI binary and the single global `lark` umbrella skill. If the documented migration preview finds legacy skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` registry, verify each listed removal and complete the documented migration. Do not run the upstream setup wizard or install the upstream full skill bundle.
@@ -149,11 +187,13 @@ Project migration reads `skills-lock.json` and `.agents/.skill-lock.json`, and r
 
 ## Update
 
-This repository is no longer updated. Use the official suite layout to update the CLI and domain guides:
+This repository is no longer updated. Install the successor [lark-suite](https://github.com/OiAnthony/lark-suite) and update it with `npx skills`:
 
 ```bash
-lark-cli update --skills-layout suite
+npx skills update lark-suite -g -y
 ```
+
+Keeping the suite layout under the official CLI (`lark-cli update --skills-layout suite`) also works, but do not mix it with the same `lark-suite` skill managed by `npx skills`.
 
 Do not install or update this repository with `npx skills add OiAnthony/lark-cli-progressive-skill` for new setups.
 
@@ -169,7 +209,7 @@ Installation provides the CLI and Agent guides. Accessing your Lark resources st
 
 ### Why should I no longer use this repository?
 
-This repository originally collected multiple domain skills behind one entry point and converted their domain documents to `GUIDE.md`. The official CLI now provides the same installation shape through `--skills-layout suite`, so this repository is deprecated.
+This repository originally collected multiple domain skills behind one entry point and converted their domain documents to `GUIDE.md`. The official CLI now provides the same installation shape through `--skills-layout suite`, so this repository is deprecated; ongoing maintenance moved to [OiAnthony/lark-suite](https://github.com/OiAnthony/lark-suite), which mirrors that same suite layout and can be installed and updated per version through `npx skills`.
 
 ## How it works
 

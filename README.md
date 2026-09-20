@@ -2,7 +2,7 @@
 
 # Lark CLI Progressive Skill
 
-> **已弃用（2026 年 9 月 20 日）**：Lark CLI 已原生支持 suite layout。新用户请使用 `lark-cli update --skills-layout suite`，不再安装本项目。本仓库保留用于历史版本、迁移参考和已安装用户的审计；后续不再同步上游指南。
+> **已弃用（2026 年 9 月 20 日）**：本仓库已停止维护。后继项目是 [OiAnthony/lark-suite](https://github.com/OiAnthony/lark-suite)——官方 CLI `suite` layout 的可版本化公共镜像。新用户请直接安装 lark-suite，不再安装本项目。本仓库保留用于历史版本、迁移参考和已安装用户的审计；不再同步上游指南。
 
 让 Coding Agent 用一个 `lark` skill 操作飞书。
 
@@ -10,23 +10,61 @@
 
 这是独立维护的 community wrapper，不是 Lark CLI 的官方发行版。该项目已进入维护终止阶段。
 
-## 迁移到官方 suite layout
+## 安装后继项目 lark-suite
 
-升级官方 CLI 并安装聚合 skill：
+[lark-suite](https://github.com/OiAnthony/lark-suite) 是官方 CLI `suite` layout 的可版本化公共镜像：单一聚合入口 `lark-suite`，各领域文档作为 `GUIDE.md` 收纳在其 `references/` 下。它由 `npx skills` 记录来源和目录 hash，因此可以用 `npx skills update` 更新，不需要重新运行 `lark-cli update`。
+
+前置要求：官方 CLI binary。`lark-suite` 的 `SKILL.md` 声明 `requires.bins: lark-cli`，缺少时 skill 无法执行。
 
 ```bash
-lark-cli update --skills-layout suite
+npm install -g @larksuite/cli@latest
 ```
 
-该命令会使用官方的 `lark-suite` 单入口，并将不同领域的文档作为对应的 `GUIDE.md` 收纳在其 `references/` 目录下。迁移完成后，可以删除本项目安装的 `lark` skill，避免两个入口同时存在。
+全局安装：
 
-如果此前安装过本项目或旧版官方独立 `lark-*` skills，请先检查全局 skill 列表，再删除确认不再使用的旧入口：
+```bash
+npx skills add OiAnthony/lark-suite --skill lark-suite -g -y -a universal
+```
+
+安装到用户全局 skill 目录 `~/.agents/skills/lark-suite`。`-a universal` 指向跨 agent 共享的 canonical 目录，写这一处即被所有读取 `~/.agents/skills` 的 agent 发现；省略它时 `npx skills` 还会把同一份 skill 扩散到其余基于 `.agents/skills` 的 agent，并额外报告一条 PromptScript 不支持全局安装的失败（详见 [vercel-labs/skills#1352](https://github.com/vercel-labs/skills/issues/1352)）。
+
+项目范围安装（去掉 `-g`）：
+
+```bash
+npx skills add OiAnthony/lark-suite --skill lark-suite -y
+```
+
+更新：
+
+```bash
+npx skills update lark-suite -g -y
+```
+
+验证：
 
 ```bash
 npx skills ls -g
 ```
 
-官方 suite layout 与本项目的核心安装目标一致；本项目不再提供持续同步服务。
+列表中应包含 `lark-suite`，来源为 `OiAnthony/lark-suite`。
+
+### 清理本项目安装的旧入口
+
+```bash
+npx skills remove lark -g -y
+```
+
+此前还装过旧版官方独立 `lark-*` skills 时，先用 `npx skills ls -g` 检查全量列表，再删除确认不再使用的条目，避免多个入口同时存在。
+
+### 与 `lark-cli update --skills-layout suite` 的关系
+
+官方 CLI 也能直接安装同一套 suite layout：
+
+```bash
+lark-cli update --skills-layout suite
+```
+
+`lark-suite` 这个名称由官方 CLI 保留。两条路径写入同一个 skill 目录（`~/.agents/skills/lark-suite`），差别只在管理方式：CLI 路径把安装状态记在 `~/.lark-cli/skills-state.json`，仓库路径由 `npx skills` 记录来源和 hash。选一条即可，不要同时使用，否则来源记录和更新方式会互相矛盾。
 
 ## 背景
 
@@ -48,7 +86,7 @@ npx skills ls -g
 
 ## 历史安装方式
 
-以下内容仅供已经安装本项目的用户复核历史安装方式。新用户请使用上面的官方 suite layout 迁移命令。
+以下内容仅供已经安装本项目的用户复核历史安装方式。新用户请使用上面的 [lark-suite 安装命令](#安装后继项目-lark-suite)。
 
 ```text
 Read and follow https://github.com/OiAnthony/lark-cli-progressive-skill#readme. Install the official Lark CLI binary and the single global `lark` umbrella skill. If the documented migration preview finds legacy skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` registry, verify each listed removal and complete the documented migration. Do not run the upstream setup wizard or install the upstream full skill bundle.
@@ -149,11 +187,13 @@ node .agents/skills/lark/scripts/migrate-legacy-skills.mjs --apply
 
 ## 更新
 
-本项目已停止更新。请使用官方 suite layout 更新 CLI 和领域指南：
+本项目已停止更新。请安装后继项目 [lark-suite](https://github.com/OiAnthony/lark-suite)，并用 `npx skills` 更新：
 
 ```bash
-lark-cli update --skills-layout suite
+npx skills update lark-suite -g -y
 ```
+
+也可以继续用官方 CLI 管理 suite layout（`lark-cli update --skills-layout suite`），但不要与 `npx skills` 管理的同一份 `lark-suite` 混用。
 
 本项目不再建议通过 `npx skills add OiAnthony/lark-cli-progressive-skill` 进行安装或更新。
 
@@ -169,7 +209,7 @@ lark-cli update --skills-layout suite
 
 ### 为什么不再使用本项目？
 
-过去本项目用于把多个领域 skill 收纳到单一入口，并把领域文档转换为 `GUIDE.md`。官方 CLI 现在已经通过 `--skills-layout suite` 原生提供相同的安装结构，因此本项目已弃用。
+过去本项目用于把多个领域 skill 收纳到单一入口，并把领域文档转换为 `GUIDE.md`。官方 CLI 现在已经通过 `--skills-layout suite` 原生提供相同的安装结构，因此本项目已弃用；后续维护转移到 [OiAnthony/lark-suite](https://github.com/OiAnthony/lark-suite)，它镜像同一套 suite layout，并可由 `npx skills` 按版本安装和更新。
 
 ## 工作原理
 
