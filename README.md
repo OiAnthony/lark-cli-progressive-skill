@@ -2,11 +2,31 @@
 
 # Lark CLI Progressive Skill
 
+> **已弃用（2026 年 9 月 20 日）**：Lark CLI 已原生支持 suite layout。新用户请使用 `lark-cli update --skills-layout suite`，不再安装本项目。本仓库保留用于历史版本、迁移参考和已安装用户的审计；后续不再同步上游指南。
+
 让 Coding Agent 用一个 `lark` skill 操作飞书。
 
 官方 Lark CLI 提供了多个按领域拆分的 skills。这个包只安装一个可发现的 `lark` skill，并在任务实际涉及日历、消息、文档、云盘等功能时，按需加载对应指南。这样可以保留完整能力，避免把所有领域说明长期放进 Agent 上下文。
 
-这是独立维护的 community wrapper，不是 Lark CLI 的官方发行版。
+这是独立维护的 community wrapper，不是 Lark CLI 的官方发行版。该项目已进入维护终止阶段。
+
+## 迁移到官方 suite layout
+
+升级官方 CLI 并安装聚合 skill：
+
+```bash
+lark-cli update --skills-layout suite
+```
+
+该命令会使用官方的 `lark-suite` 单入口，并将不同领域的文档作为对应的 `GUIDE.md` 收纳在其 `references/` 目录下。迁移完成后，可以删除本项目安装的 `lark` skill，避免两个入口同时存在。
+
+如果此前安装过本项目或旧版官方独立 `lark-*` skills，请先检查全局 skill 列表，再删除确认不再使用的旧入口：
+
+```bash
+npx skills ls -g
+```
+
+官方 suite layout 与本项目的核心安装目标一致；本项目不再提供持续同步服务。
 
 ## 背景
 
@@ -26,15 +46,15 @@
 - 你需要上游 Lark CLI 的完整独立 skill bundle。
 - 你不使用支持 Skills 的 Coding Agent。
 
-## 推荐：让 Coding Agent 安装
+## 历史安装方式
 
-把下面提示词复制给你的 Coding Agent。它会阅读本 README、完成全局安装，并检查是否存在已安装的官方旧版 `lark-*` skills。只有检测到这类 skills 时，才会预览并执行迁移。
+以下内容仅供已经安装本项目的用户复核历史安装方式。新用户请使用上面的官方 suite layout 迁移命令。
 
 ```text
 Read and follow https://github.com/OiAnthony/lark-cli-progressive-skill#readme. Install the official Lark CLI binary and the single global `lark` umbrella skill. If the documented migration preview finds legacy skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` registry, verify each listed removal and complete the documented migration. Do not run the upstream setup wizard or install the upstream full skill bundle.
 ```
 
-## 手动安装
+### 历史手动安装
 
 ### 环境要求
 
@@ -42,7 +62,7 @@ Read and follow https://github.com/OiAnthony/lark-cli-progressive-skill#readme. 
 - npm
 - 支持 Skills 的 Coding Agent
 
-### 全局安装
+#### 全局安装
 
 安装官方 CLI binary 和单一的 `lark` umbrella skill：
 
@@ -129,16 +149,13 @@ node .agents/skills/lark/scripts/migrate-legacy-skills.mjs --apply
 
 ## 更新
 
-分别更新 CLI binary 和 progressive skill：
+本项目已停止更新。请使用官方 suite layout 更新 CLI 和领域指南：
 
 ```bash
-npm install -g @larksuite/cli@latest
-npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
+lark-cli update --skills-layout suite
 ```
 
-不要运行 `lark-cli update`。该命令会更新 binary 并重新安装上游完整 skill bundle，与本包的按需加载模式冲突。
-
-本 skill 会针对每条命令抑制 CLI update 和 skill-sync notice，不会修改 shell configuration。
+本项目不再建议通过 `npx skills add OiAnthony/lark-cli-progressive-skill` 进行安装或更新。
 
 ## 常见问题
 
@@ -150,9 +167,9 @@ npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
 
 安装只提供 CLI 和 Agent 指南。访问你的飞书资源前，仍需完成应用配置，并按实际任务授予用户身份所需的最小权限。
 
-### 为什么不能运行 `lark-cli update`？
+### 为什么不再使用本项目？
 
-该命令会重新安装上游完整 skill bundle。请用本 README 的更新命令分别更新 CLI binary 和 progressive skill。
+过去本项目用于把多个领域 skill 收纳到单一入口，并把领域文档转换为 `GUIDE.md`。官方 CLI 现在已经通过 `--skills-layout suite` 原生提供相同的安装结构，因此本项目已弃用。
 
 ## 工作原理
 
@@ -186,7 +203,9 @@ references/routing.md                generated routing contract
 - 以当前 CLI 的 `--help` 和 schema 为准，不在 prompt 上下文中保留大量 flag 和 resource inventory。
 - 保留领域指南中关于发送、删除、审批和权限变更的确认规则。
 
-## 维护者指南
+## 历史维护说明
+
+本节仅供需要复现历史构建或审计旧版本的维护者参考。仓库不再运行每日上游同步，也不再接受以持续镜像更新为目的的维护工作。
 
 源镜像由固定的上游 Lark CLI commit 生成：
 
@@ -200,7 +219,7 @@ npm run check
 
 `config/domains.json` 必须完整覆盖 lock 中的所有 domain。修改 manifest 后运行 `npm run generate:routing`，并提交生成的 `skills/lark/references/routing.md`。新增上游 domain、路由漂移、失效或重复命中的 policy overlay、文件缺失和内容篡改都会使检查失败。
 
-GitHub Actions 每日运行同步。常规镜像 diff 通过 `npm test` 和严格的 `npm run check` 后，才会创建或更新唯一的 `automation/sync-lark-skills` pull request；工作流不会自动合并。上游新增或删除 domain 时，工作流会在 relaxed integrity check 通过后仍创建 review PR，但严格 CI 会保持失败，直到维护者更新 `config/domains.json` 并重新生成 `references/routing.md`。对于修改 generated mirror 的 pull request，CI 会从上游重建镜像，任何由此产生的 generated diff 都会使验证失败。合并前必须检查生成指南的变更，尤其是 authentication、authorization、sending、deletion、approval、permission、shell command 和 update policy。
+历史版本曾通过 GitHub Actions 同步上游指南。当前同步工作流已停用；如需验证仓库中的历史镜像，可运行本节的本地检查命令。对于修改 generated mirror 的 pull request，CI 仍会从锁定的上游版本重建镜像并验证差异。
 
 在仓库中验证包结构：
 

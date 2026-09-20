@@ -2,11 +2,31 @@
 
 # Lark CLI Progressive Skill
 
+> **Deprecated (September 20, 2026):** Lark CLI now supports the suite layout natively. New users should run `lark-cli update --skills-layout suite` instead of installing this repository. This repository is retained for historical versions, migration reference, and audits of existing installations; upstream guide syncing has ended.
+
 Use one `lark` skill to let a coding agent work with Lark or Feishu.
 
 The official Lark CLI provides skills split by domain. This package installs one discoverable `lark` skill, then loads the required guide only when a task involves calendars, messages, documents, Drive, or another Lark domain. It keeps the full capability set without holding every domain guide in the Agent context all the time.
 
-This is an independently maintained community wrapper, not an official Lark CLI release.
+This is an independently maintained community wrapper, not an official Lark CLI release. The project is now in maintenance termination.
+
+## Migrate to the official suite layout
+
+Update the official CLI and install its umbrella skill:
+
+```bash
+lark-cli update --skills-layout suite
+```
+
+The command installs the official `lark-suite` entry point and stores each domain guide as `GUIDE.md` under its `references/` directory. After migration, remove this repository's installed `lark` skill so that two competing entry points are not left installed.
+
+If this repository or the old standalone `lark-*` skills were previously installed, inspect the global skill list before removing entries you no longer use:
+
+```bash
+npx skills ls -g
+```
+
+The official suite layout now covers this project's core installation goal. This repository no longer provides ongoing upstream synchronization.
 
 ## Background
 
@@ -26,23 +46,23 @@ Do not use this package when:
 - You need the upstream Lark CLI's complete standalone skill bundle.
 - You do not use a coding agent that supports Skills.
 
-## Recommended: install with a coding agent
+## Historical installation method
 
-Copy the following prompt into your coding agent. It reads this README, completes the global installation, and checks for legacy official `lark-*` skills. It previews and performs a migration only when it finds those skills.
+The following is retained only for existing users reviewing the historical installation method. New users should use the official suite layout migration command above.
 
 ```text
 Read and follow https://github.com/OiAnthony/lark-cli-progressive-skill#readme. Install the official Lark CLI binary and the single global `lark` umbrella skill. If the documented migration preview finds legacy skills confirmed as sourced from `larksuite/cli` or the official `open.feishu.cn` registry, verify each listed removal and complete the documented migration. Do not run the upstream setup wizard or install the upstream full skill bundle.
 ```
 
-## Manual installation
+### Historical manual installation
 
-### Requirements
+#### Requirements
 
 - Node.js 20 or later
 - npm
 - A coding agent that supports Skills
 
-### Install globally
+#### Install globally
 
 Install the official CLI binary and the single `lark` umbrella skill:
 
@@ -129,16 +149,13 @@ Project migration reads `skills-lock.json` and `.agents/.skill-lock.json`, and r
 
 ## Update
 
-Update the CLI binary and the progressive skill separately:
+This repository is no longer updated. Use the official suite layout to update the CLI and domain guides:
 
 ```bash
-npm install -g @larksuite/cli@latest
-npx skills add OiAnthony/lark-cli-progressive-skill --skill lark -g -y
+lark-cli update --skills-layout suite
 ```
 
-Do not run `lark-cli update`. It updates the binary and reinstalls the upstream full skill bundle, which conflicts with this package's progressive-loading model.
-
-This skill suppresses the CLI update and skill-sync notices for each command. It does not modify your shell configuration.
+Do not install or update this repository with `npx skills add OiAnthony/lark-cli-progressive-skill` for new setups.
 
 ## FAQ
 
@@ -150,9 +167,9 @@ That is expected. `lark` loads the calendar, messaging, document, Drive, and oth
 
 Installation provides the CLI and Agent guides. Accessing your Lark resources still requires app configuration and the minimum user permissions needed for the task.
 
-### Why must I not run `lark-cli update`?
+### Why should I no longer use this repository?
 
-That command reinstalls the upstream full skill bundle. Use the update commands in this README to update the CLI binary and progressive skill separately.
+This repository originally collected multiple domain skills behind one entry point and converted their domain documents to `GUIDE.md`. The official CLI now provides the same installation shape through `--skills-layout suite`, so this repository is deprecated.
 
 ## How it works
 
@@ -186,7 +203,9 @@ The design follows the approach proposed in [larksuite/cli#1392](https://github.
 - It uses the current CLI `--help` and schema instead of retaining large flag and resource inventories in prompt context.
 - It preserves domain-guide confirmation rules for sending, deletion, approvals, and permission changes.
 
-## Maintainer guide
+## Historical maintainer notes
+
+This section is retained only for maintainers who need to reproduce or audit a historical build. The repository no longer runs daily upstream synchronization or accepts maintenance work whose purpose is to keep the mirror current.
 
 The source mirror is generated from a pinned upstream Lark CLI commit:
 
@@ -200,7 +219,7 @@ npm run check
 
 `config/domains.json` must cover every domain in the lock. After changing the manifest, run `npm run generate:routing` and commit the generated `skills/lark/references/routing.md`. A new upstream domain, route drift, a stale or ambiguous policy overlay, a missing file, or modified generated content makes validation fail.
 
-GitHub Actions runs the sync daily. A normal mirror diff that passes `npm test` and strict `npm run check` creates or updates the single `automation/sync-lark-skills` pull request; the workflow does not merge it automatically. When upstream adds or removes a domain, the workflow runs the relaxed integrity check and still opens the review PR, but its strict CI remains red until a maintainer updates `config/domains.json` and regenerates `references/routing.md`. For pull requests that modify the generated mirror, CI rebuilds it from upstream and rejects any resulting generated diff. Before merging, review generated guide changes involving authentication, authorization, sending, deletion, approval, permissions, shell commands, and update policy.
+Historical versions used GitHub Actions to synchronize upstream guides. The synchronization workflow is now disabled. For pull requests that modify the generated mirror, CI still rebuilds it from the locked upstream revision and rejects any resulting generated diff.
 
 Verify the package structure in this repository:
 
